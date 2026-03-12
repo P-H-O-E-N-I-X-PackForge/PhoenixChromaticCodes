@@ -2,7 +2,6 @@ package net.phoenix.chromatic_codes.api;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.phoenix.ChromaticAPI;
@@ -47,8 +46,10 @@ public class ChromaticEffectsRegistry {
                 // This ensures the Mixin sees the 'phoenix_chromatic_codes' namespace and applies the gradient
                 ResourceLocation fontId = PhoenixChromaticCodes.id(movementId);
 
-                // Check your latest.log for this line to confirm it registered as phoenix_chromatic_codes:none [cite: 1, 2, 3]
-                PhoenixChromaticCodes.LOGGER.info("Phoenix Chromatic: Registering §{} with effect {} on font {}", code, movementId, fontId);
+                // Check your latest.log for this line to confirm it registered as phoenix_chromatic_codes:none [cite:
+                // 1, 2, 3]
+                PhoenixChromaticCodes.LOGGER.info("Phoenix Chromatic: Registering §{} with effect {} on font {}", code,
+                        movementId, fontId);
 
                 ChromaticAPI.registerEffect(code, fontId, effect);
             } catch (Exception e) {

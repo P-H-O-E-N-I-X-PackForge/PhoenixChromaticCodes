@@ -4,7 +4,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.phoenix.ChromaticAPI;
-import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
 import org.apache.logging.log4j.LogManager;
@@ -78,7 +77,6 @@ public class ChromaticColors {
         }
         return root;
     }
-
 
     public static void init() {
         String[] colorSettings = ModConfig.INSTANCE.colors.customColors;

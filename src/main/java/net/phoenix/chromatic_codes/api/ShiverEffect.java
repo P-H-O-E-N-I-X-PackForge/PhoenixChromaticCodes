@@ -2,9 +2,8 @@ package net.phoenix.chromatic_codes.api;
 
 import java.util.List;
 
-import static net.phoenix.chromatic_codes.api.ColorHelper.lerp;
-
 public class ShiverEffect implements IChromaticEffect {
+
     private final float colorSpeed;
     private final float moveSpeed;
     private final List<Integer> colors;

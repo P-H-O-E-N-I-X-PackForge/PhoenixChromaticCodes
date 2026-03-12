@@ -9,8 +9,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.phoenix.chromatic_codes.api.*;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
-import dev.toma.configuration.Configuration;
-import dev.toma.configuration.config.format.ConfigFormats;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,7 +22,6 @@ public class PhoenixChromaticCodes {
         IEventBus modEventBus = context.getModEventBus();
 
         ModConfig.init();
-
 
         MovementRegistry.register("wave", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "wave"));
         MovementRegistry.register("shake", ShiverEffect::new);

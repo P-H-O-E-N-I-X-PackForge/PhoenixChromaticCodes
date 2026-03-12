@@ -16,8 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(targets = "net.minecraft.client.gui.Font$StringRenderOutput")
 public abstract class MixinStringRenderOutput {
 
-    @Shadow float x;
-    @Shadow float y;
+    @Shadow
+    float x;
+    @Shadow
+    float y;
 
     // We store the current offset to reset it accurately
     @Unique
