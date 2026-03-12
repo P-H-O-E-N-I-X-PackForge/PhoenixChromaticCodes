@@ -6,11 +6,9 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.phoenix.chromatic_codes.api.ChromaticColors;
-import net.phoenix.chromatic_codes.api.ChromaticEffectsRegistry;
+import net.phoenix.chromatic_codes.api.*;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
-import com.tterrag.registrate.Registrate;
 import dev.toma.configuration.Configuration;
 import dev.toma.configuration.config.format.ConfigFormats;
 import org.apache.logging.log4j.LogManager;
@@ -21,22 +19,23 @@ public class PhoenixChromaticCodes {
 
     public static final String MOD_ID = "phoenix_chromatic_codes";
     public static final Logger LOGGER = LogManager.getLogger();
-    public static final Registrate CHROMATIC_REGISTRATE = Registrate.create(MOD_ID);
 
     public PhoenixChromaticCodes(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
         ModConfig.init();
+
+
+        MovementRegistry.register("wave", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "wave"));
+        MovementRegistry.register("shake", ShiverEffect::new);
+        MovementRegistry.register("none", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "none"));
+        MovementRegistry.register("pulse", PulseEffect::new);
+        MovementRegistry.register("static_rainbow", StaticRainbowEffect::new);
+        MovementRegistry.register("glitch", GlitchEffect::new);
+
+        // 2. SECOND: Now init the registry so it can find the types above
         ChromaticEffectsRegistry.init();
-        ChromaticColors.init();
-        modEventBus.register(CHROMATIC_REGISTRATE);
-        TestingBlocks.init();
 
-        // Configuration
-        Configuration.registerConfig(ModConfig.class, ConfigFormats.yaml());
-
-        modEventBus.register(CHROMATIC_REGISTRATE);
-        TestingBlocks.init();
         ChromaticColors.init();
 
         modEventBus.addListener(this::commonSetup);

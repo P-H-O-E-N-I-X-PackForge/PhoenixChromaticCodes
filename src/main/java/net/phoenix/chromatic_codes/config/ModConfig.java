@@ -31,19 +31,21 @@ public class ModConfig {
         })
         public String[] customColors = new String[] {
                 "z:BF00FF",
-                "p:FF2100"
         };
 
         @Configurable
         @Configurable.Comment({
-                "Format: 'char:speed:movementId:hex1,hex2...'",
-                "Example: 'w:1.0:wave:rainbow'",
-                "Movement IDs: wave, shake, none"
+                "Format: 'char:colorSpeed:moveSpeed:movementId:hex1,hex2...'",
+                "Example: 'w:1.0:0.5:wave:rainbow'",
+                "Movement IDs: wave, shake, pulse, static_rainbow, glitch, none"
         })
         public String[] customGradients = new String[] {
-                "w:1.0:wave:rainbow",        // Now configurable!
-                "s:0.0:shake:FFFFFF",       // Shake is now white by default but configurable
-                "y:2.5:none:FF0000,FFFF00,00FF00,00FFFF,0000FF,FF00FF"
+                "w:1.0:1.0:wave:rainbow",        // Smooth rainbow wave
+                "s:0.0:2.5:shake:FFFFFF",       // White violent shaking
+                "p:1.0:2.0:pulse:FF0000,990000", // Red breathing pulse
+                "*:1.5:0.0:static_rainbow:rainbow", // Entire word cycles rainbow
+                "g:1.0:3.0:glitch:00FF00,005500", // Green matrix glitch
+                "y:2.5:0.0:none:FF0000,FFFF00,00FF00" // Static horizontal gradient
         };
     }
 }

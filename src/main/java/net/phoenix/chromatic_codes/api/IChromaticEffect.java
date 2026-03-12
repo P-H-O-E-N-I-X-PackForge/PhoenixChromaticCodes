@@ -3,21 +3,12 @@ package net.phoenix.chromatic_codes.api;
 import net.minecraft.network.chat.Style;
 
 public interface IChromaticEffect {
+    int getRenderColor(int original, float x, float y);
+    float getXOffset(float x, float y);
+    float getYOffset(float x, float y);
 
-    // This is the method the Renderer calls
     default Style apply(Style style, float x, float y) {
-        int color = getRenderColor(style.getColor() != null ? style.getColor().getValue() : 0xFFFFFF, x, y);
-        // We apply the offsets internally or via the renderer
-        return style.withColor(color);
-    }
-
-    int getRenderColor(int originalColor, float x, float y);
-
-    default float getXOffset(float x, float y) {
-        return 0;
-    }
-
-    default float getYOffset(float x, float y) {
-        return 0;
+        // This is the bridge: it injects the color into the style
+        return style.withColor(getRenderColor(0, x, y));
     }
 }

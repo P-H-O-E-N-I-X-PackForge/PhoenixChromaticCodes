@@ -2,6 +2,8 @@ package net.phoenix.chromatic_codes.api;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.phoenix.ChromaticAPI;
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
@@ -45,10 +47,8 @@ public class ChromaticColors {
 
     public static Component parseCustomEffects(String text) {
         MutableComponent root = Component.literal("");
-        // Split by the section symbol to isolate codes
         String[] parts = text.split("§");
 
-        // Add the first part (text before any code)
         if (!parts[0].isEmpty()) root.append(Component.literal(parts[0]));
 
         for (int i = 1; i < parts.length; i++) {
@@ -59,18 +59,17 @@ public class ChromaticColors {
             String content = part.substring(1);
             MutableComponent segment = Component.literal(content);
 
-            // Handle Effects by Font
-            if (code == 'w' || code == 'x') {
-                segment.withStyle(s -> s.withFont(PhoenixChromaticCodes.id("wave")).withColor(0xFFFFFF));
-            } else if (code == 's') {
-                segment.withStyle(s -> s.withFont(PhoenixChromaticCodes.id("shake")).withColor(0xFFFFFF));
+            // 1. Check if it's a Dynamic Effect (Wave/Shake/Gradient)
+            ResourceLocation dynamicFont = ChromaticAPI.getFontForCode(code);
+            if (dynamicFont != null) {
+                segment.withStyle(s -> s.withFont(dynamicFont));
             }
-            // Handle Custom Hex Colors
+            // 2. Check if it's a Static Custom Color
             else if (CUSTOM_FORMATTING.containsKey(code)) {
                 int color = CUSTOM_FORMATTING.get(code);
                 segment.withStyle(s -> s.withColor(color));
             }
-            // Fallback for vanilla
+            // 3. Fallback for vanilla
             else {
                 root.append(Component.literal("§" + part));
                 continue;
@@ -79,6 +78,7 @@ public class ChromaticColors {
         }
         return root;
     }
+
 
     public static void init() {
         String[] colorSettings = ModConfig.INSTANCE.colors.customColors;
