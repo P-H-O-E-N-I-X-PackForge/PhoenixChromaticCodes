@@ -1,6 +1,7 @@
 package net.phoenix.chromatic_codes.api;
 
 public class ColorHelper {
+
     public static int lerp(int col1, int col2, float factor) {
         int r1 = (col1 >> 16) & 0xFF;
         int g1 = (col1 >> 8) & 0xFF;

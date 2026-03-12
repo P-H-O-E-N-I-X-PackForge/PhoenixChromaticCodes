@@ -1,6 +1,7 @@
 package net.phoenix.chromatic_codes.config;
 
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
+
 import dev.toma.configuration.Configuration;
 import dev.toma.configuration.config.Config;
 import dev.toma.configuration.config.ConfigHolder;
@@ -22,6 +23,7 @@ public class ModConfig {
     public ColorConfig colors = new ColorConfig();
 
     public static class ColorConfig {
+
         @Configurable
         @Configurable.Comment({
                 "Add custom formatting codes here.",

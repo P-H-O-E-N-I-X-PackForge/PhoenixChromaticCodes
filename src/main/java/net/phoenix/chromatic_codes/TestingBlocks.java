@@ -1,12 +1,12 @@
 package net.phoenix.chromatic_codes;
 
-import com.tterrag.registrate.util.nullness.NonNullBiFunction;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 import com.tterrag.registrate.util.entry.BlockEntry;
+import com.tterrag.registrate.util.nullness.NonNullBiFunction;
 import org.jetbrains.annotations.NotNull;
 
 import static net.phoenix.chromatic_codes.PhoenixChromaticCodes.CHROMATIC_REGISTRATE;

@@ -1,18 +1,16 @@
 package net.phoenix.chromatic_codes;
 
-import com.tterrag.registrate.Registrate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.phoenix.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
 import net.phoenix.chromatic_codes.api.ChromaticEffectsRegistry;
-import net.phoenix.chromatic_codes.api.ChromaticTooltipHelper;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
+import com.tterrag.registrate.Registrate;
 import dev.toma.configuration.Configuration;
 import dev.toma.configuration.config.format.ConfigFormats;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +42,6 @@ public class PhoenixChromaticCodes {
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
     }
-
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Phoenix's Chromatic Codes is heating up!");

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChromaticEffects {
+
     private static final Map<ResourceLocation, IChromaticEffect> REGISTRY = new HashMap<>();
 
     public static void register(ResourceLocation id, IChromaticEffect effect) {

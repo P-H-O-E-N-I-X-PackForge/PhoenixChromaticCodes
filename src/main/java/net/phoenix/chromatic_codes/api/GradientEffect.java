@@ -3,6 +3,7 @@ package net.phoenix.chromatic_codes.api;
 import net.minecraft.resources.ResourceLocation;
 
 public class GradientEffect implements IChromaticEffect {
+
     private final int[] colors;
     private final float speed;
     private final ResourceLocation movementId;

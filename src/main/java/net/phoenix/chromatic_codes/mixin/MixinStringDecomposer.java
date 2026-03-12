@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.StringDecomposer;
 import net.phoenix.ChromaticAPI;
-import net.phoenix.chromatic_codes.api.ChromaticColors;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,8 +14,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(StringDecomposer.class)
 public class MixinStringDecomposer {
-    @Inject(method = "iterateFormatted(Ljava/lang/String;ILnet/minecraft/network/chat/Style;Lnet/minecraft/network/chat/Style;Lnet/minecraft/util/FormattedCharSink;)Z", at = @At("HEAD"), cancellable = true)
-    private static void phoenix$injectCustomStyles(String text, int skip, Style currentStyle, Style defaultStyle, FormattedCharSink sink, CallbackInfoReturnable<Boolean> cir) {
+
+    @Inject(method = "iterateFormatted(Ljava/lang/String;ILnet/minecraft/network/chat/Style;Lnet/minecraft/network/chat/Style;Lnet/minecraft/util/FormattedCharSink;)Z",
+            at = @At("HEAD"),
+            cancellable = true)
+    private static void phoenix$injectCustomStyles(String text, int skip, Style currentStyle, Style defaultStyle,
+                                                   FormattedCharSink sink, CallbackInfoReturnable<Boolean> cir) {
         if (text.indexOf('\u00a7') == -1) return;
 
         int len = text.length();

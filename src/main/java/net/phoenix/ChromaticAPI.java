@@ -2,10 +2,12 @@ package net.phoenix;
 
 import net.minecraft.resources.ResourceLocation;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class ChromaticAPI {
+
     // Maps a character (e.g., 'w') to the Logic (IChromaticEffect)
     private static final Map<Character, IChromaticEffect> EFFECTS = new HashMap<>();
 

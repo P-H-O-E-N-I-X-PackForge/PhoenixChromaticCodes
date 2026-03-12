@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.phoenix.ChromaticAPI;
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 import net.phoenix.chromatic_codes.config.ModConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class ChromaticEffectsRegistry {
 
                 // Matches the new ChromaticAPI.registerEffect(char, ResourceLocation, IChromaticEffect)
                 ChromaticAPI.registerEffect(code, fontId, new IChromaticEffect() {
+
                     @Override
                     public int getRenderColor(int originalColor, float x, float y) {
                         return getGradientColor(finalColors, speed, System.currentTimeMillis(), x);
@@ -61,7 +63,8 @@ public class ChromaticEffectsRegistry {
                 });
 
             } catch (Exception e) {
-                PhoenixChromaticCodes.LOGGER.error("Error parsing chromatic config entry [{}]: {}", entry, e.getMessage());
+                PhoenixChromaticCodes.LOGGER.error("Error parsing chromatic config entry [{}]: {}", entry,
+                        e.getMessage());
             }
         }
     }
@@ -95,7 +98,8 @@ public class ChromaticEffectsRegistry {
     private static Style applyMovement(Style style, String type) {
         if (style.getFont().getPath().equals("default")) return style;
 
-        ResourceLocation movementId = new ResourceLocation(type.contains(":") ? type : "phoenix_chromatic_codes:" + type);
+        ResourceLocation movementId = new ResourceLocation(
+                type.contains(":") ? type : "phoenix_chromatic_codes:" + type);
         IChromaticEffect effect = ChromaticAPI.getByFont(movementId);
 
         if (effect != null) {
