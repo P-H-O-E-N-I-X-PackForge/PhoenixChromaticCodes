@@ -1,12 +1,16 @@
 package net.phoenix.chromatic_codes;
 
+import com.tterrag.registrate.Registrate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.phoenix.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
+import net.phoenix.chromatic_codes.api.ChromaticEffectsRegistry;
+import net.phoenix.chromatic_codes.api.ChromaticTooltipHelper;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
 import dev.toma.configuration.Configuration;
@@ -19,28 +23,34 @@ public class PhoenixChromaticCodes {
 
     public static final String MOD_ID = "phoenix_chromatic_codes";
     public static final Logger LOGGER = LogManager.getLogger();
-    // public static final Registrate CHROMATIC_REGISTRATE = Registrate.create(MOD_ID);
+    public static final Registrate CHROMATIC_REGISTRATE = Registrate.create(MOD_ID);
 
     public PhoenixChromaticCodes(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
         ModConfig.init();
-        // modEventBus.register(CHROMATIC_REGISTRATE);
-        // TestingBlocks.init();
+        ChromaticEffectsRegistry.init();
         ChromaticColors.init();
+        modEventBus.register(CHROMATIC_REGISTRATE);
+        TestingBlocks.init();
 
         // Configuration
         Configuration.registerConfig(ModConfig.class, ConfigFormats.yaml());
 
+        modEventBus.register(CHROMATIC_REGISTRATE);
+        TestingBlocks.init();
+        ChromaticColors.init();
+
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
     }
+
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Phoenix's Chromatic Codes is heating up!");
     }
 
     public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+        return new ResourceLocation(MOD_ID, path);
     }
 }

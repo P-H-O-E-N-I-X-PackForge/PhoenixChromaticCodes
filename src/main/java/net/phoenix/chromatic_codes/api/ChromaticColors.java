@@ -1,5 +1,8 @@
 package net.phoenix.chromatic_codes.api;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
 import org.apache.logging.log4j.LogManager;
@@ -38,6 +41,43 @@ public class ChromaticColors {
                 LOGGER.error("Failed to parse color config entry: {}", entry);
             }
         }
+    }
+
+    public static Component parseCustomEffects(String text) {
+        MutableComponent root = Component.literal("");
+        // Split by the section symbol to isolate codes
+        String[] parts = text.split("§");
+
+        // Add the first part (text before any code)
+        if (!parts[0].isEmpty()) root.append(Component.literal(parts[0]));
+
+        for (int i = 1; i < parts.length; i++) {
+            String part = parts[i];
+            if (part.isEmpty()) continue;
+
+            char code = Character.toLowerCase(part.charAt(0));
+            String content = part.substring(1);
+            MutableComponent segment = Component.literal(content);
+
+            // Handle Effects by Font
+            if (code == 'w' || code == 'x') {
+                segment.withStyle(s -> s.withFont(PhoenixChromaticCodes.id("wave")).withColor(0xFFFFFF));
+            } else if (code == 's') {
+                segment.withStyle(s -> s.withFont(PhoenixChromaticCodes.id("shake")).withColor(0xFFFFFF));
+            }
+            // Handle Custom Hex Colors
+            else if (CUSTOM_FORMATTING.containsKey(code)) {
+                int color = CUSTOM_FORMATTING.get(code);
+                segment.withStyle(s -> s.withColor(color));
+            }
+            // Fallback for vanilla
+            else {
+                root.append(Component.literal("§" + part));
+                continue;
+            }
+            root.append(segment);
+        }
+        return root;
     }
 
     public static void init() {

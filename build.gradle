@@ -34,12 +34,12 @@ repositories {
         name = "BlameJared"
         url = "https://maven.blamejared.com/"
     }
-  //  maven { // Registrate
-     //   url = "https://maven.tterrag.com/"
-     //   content {
-      //      includeGroup("com.tterrag.registrate")
-     //   }
-   // }
+    maven { // Registrate
+        url = "https://maven.tterrag.com/"
+        content {
+            includeGroup("com.tterrag.registrate")
+        }
+    }
 }
 
 version = mod_version
@@ -98,9 +98,8 @@ dependencies {
     // Mixin Processor
     annotationProcessor('org.spongepowered:mixin:0.8.5:processor')
 
-    // Configuration Library (The one you like!)
     modImplementation("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
-   // modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")
+    modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.24'

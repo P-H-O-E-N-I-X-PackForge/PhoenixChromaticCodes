@@ -5,9 +5,12 @@
   "minVersion": "0.8",
   "mixins": [
     "MixinChatFormatting",
+    "MixinLiteralContents",
+    "MixinStringDecomposer",
     "MixinTextColor"
   ],
   "client": [
+    "MixinStringRenderOutput"
   ],
   "injectors": {
     "defaultRequire": 1
