@@ -18,7 +18,7 @@ public class MixinTextColor {
      */
     @Inject(method = "fromLegacyFormat", at = @At("HEAD"), cancellable = true)
     private static void phoenix$applyCustomHex(ChatFormatting formatting, CallbackInfoReturnable<TextColor> cir) {
-        // Check if our StringDecomposer mixin has flagged a custom code in this thread
+
         char lastCode = ChromaticColors.LAST_CODE.get();
 
         if (lastCode != ' ' && ChromaticColors.CUSTOM_FORMATTING.containsKey(lastCode)) {

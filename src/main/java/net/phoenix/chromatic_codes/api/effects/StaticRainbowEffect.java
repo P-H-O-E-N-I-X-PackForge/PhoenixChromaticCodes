@@ -19,7 +19,6 @@ public class StaticRainbowEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int original, float x, float y) {
-        // By passing 0 instead of 'x', the whole string cycles colors in unison
         return ColorHelper.getGradientColor(colors, colorSpeed, 0);
     }
 

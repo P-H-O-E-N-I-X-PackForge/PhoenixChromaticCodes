@@ -15,9 +15,9 @@ public class MovementRegistry {
         REGISTRY.put(id.toLowerCase(), factory);
     }
 
-    // Must take 4 arguments: id, colorSpeed, moveSpeed, colors
+
     public static IChromaticEffect create(String id, float colorSpeed, float moveSpeed, List<Integer> colors) {
-        // Force lowercase to avoid "Wave" vs "wave" issues
+
         MovementFactory factory = REGISTRY.get(id.toLowerCase());
 
         if (factory == null) {

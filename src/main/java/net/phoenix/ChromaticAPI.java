@@ -12,7 +12,6 @@ public class ChromaticAPI {
     private static final Map<ResourceLocation, IChromaticEffect> FONT_TO_EFFECT = new HashMap<>();
     private static final Map<Character, ResourceLocation> CODE_TO_FONT = new HashMap<>();
 
-    // The Bridge: Stores the effect being rendered on the current thread
     private static final ThreadLocal<IChromaticEffect> CURRENT_EFFECT = new ThreadLocal<>();
 
     public static void setCurrentEffect(IChromaticEffect effect) {

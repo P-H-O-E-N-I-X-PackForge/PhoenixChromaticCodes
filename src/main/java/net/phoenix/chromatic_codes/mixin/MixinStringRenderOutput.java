@@ -12,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-// Using priority 2000 to ensure we apply AFTER performance mods like Embeddium/ModernFix
-// Set priority to 2000 to ensure it applies AFTER ModernFix/Embeddium
 @Mixin(targets = "net.minecraft.client.gui.Font$StringRenderOutput", priority = 2000)
 public abstract class MixinStringRenderOutput {
 
@@ -45,7 +43,6 @@ public abstract class MixinStringRenderOutput {
         if (style.getFont().getNamespace().equals("phoenix_chromatic_codes")) {
             IChromaticEffect effect = ChromaticAPI.getByFont(style.getFont());
             if (effect != null) {
-                // This ensures the color is dynamic every frame
                 return style.withColor(TextColor.fromRgb(effect.getRenderColor(0, this.x, this.y)));
             }
         }

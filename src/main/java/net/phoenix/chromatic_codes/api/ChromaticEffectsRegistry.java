@@ -16,10 +16,10 @@ import static net.phoenix.chromatic_codes.api.ChromaticColors.CUSTOM_FORMATTING;
 public class ChromaticEffectsRegistry {
 
     public static void init() {
-        // Initialize static hex colors
+
         ChromaticColors.init();
 
-        // Parse and register the dynamic gradients/movements
+
         parseAndRegister(ModConfig.INSTANCE.colors.customGradients);
     }
 
@@ -42,12 +42,10 @@ public class ChromaticEffectsRegistry {
 
                 IChromaticEffect effect = MovementRegistry.create(movementId, colorSpeed, moveSpeed, colors);
 
-                // FIX: Map "none" to a custom ResourceLocation instead of Style.DEFAULT_FONT
-                // This ensures the Mixin sees the 'phoenix_chromatic_codes' namespace and applies the gradient
+
                 ResourceLocation fontId = PhoenixChromaticCodes.id(movementId);
 
-                // Check your latest.log for this line to confirm it registered as phoenix_chromatic_codes:none [cite:
-                // 1, 2, 3]
+
                 PhoenixChromaticCodes.LOGGER.info("Phoenix Chromatic: Registering §{} with effect {} on font {}", code,
                         movementId, fontId);
 
@@ -86,7 +84,6 @@ public class ChromaticEffectsRegistry {
             ResourceLocation dynamicFont = ChromaticAPI.getFontForCode(code);
 
             if (dynamicFont != null) {
-                // Apply the font and STRIP existing color so the Mixin can inject the gradient
                 segment.withStyle(style -> style.withFont(dynamicFont).withColor((TextColor) null));
             } else if (CUSTOM_FORMATTING.containsKey(code)) {
                 segment.withStyle(style -> style.withColor(TextColor.fromRgb(CUSTOM_FORMATTING.get(code))));

@@ -8,7 +8,6 @@ public interface IChromaticEffect {
 
     float getYOffset(float x, float y);
 
-    // Add this to fix the "Method does not override" error
     default boolean isStatic() {
         return false;
     }

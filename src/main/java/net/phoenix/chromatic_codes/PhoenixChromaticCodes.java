@@ -21,17 +21,13 @@ public class PhoenixChromaticCodes {
     public PhoenixChromaticCodes(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
-        // Load config early
         ModConfig.init();
 
-        // Register the setup listener
         modEventBus.addListener(this::commonSetup);
 
-        // No need to register 'this' to Forge bus if there are no @SubscribeEvent methods here
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        // Enqueue registry work to be thread-safe
         event.enqueueWork(() -> {
             MovementRegistry.register("wave", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "wave"));
             MovementRegistry.register("shake", ShiverEffect::new);

@@ -19,7 +19,7 @@ public class PhoenixEffect implements IChromaticEffect {
 
     @Override
     public boolean isAnimated() {
-        return true; // Triggers the UV shift in MixinBakedGlyph
+        return true;
     }
 
     @Override

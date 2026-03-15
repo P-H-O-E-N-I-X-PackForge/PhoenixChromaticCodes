@@ -19,7 +19,6 @@ public class ShiverEffect implements IChromaticEffect {
 
     @Override
     public float getXOffset(float x, float y) {
-        // moveSpeed scales the 'strength' of the jitter
         return (float) (Math.random() - 0.5) * 2.0f * moveSpeed;
     }
 

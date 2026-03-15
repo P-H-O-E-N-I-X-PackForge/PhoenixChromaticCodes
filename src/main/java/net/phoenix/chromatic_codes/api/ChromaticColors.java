@@ -58,17 +58,16 @@ public class ChromaticColors {
             String content = part.substring(1);
             MutableComponent segment = Component.literal(content);
 
-            // 1. Check if it's a Dynamic Effect (Wave/Shake/Gradient)
+
             ResourceLocation dynamicFont = ChromaticAPI.getFontForCode(code);
             if (dynamicFont != null) {
                 segment.withStyle(s -> s.withFont(dynamicFont));
             }
-            // 2. Check if it's a Static Custom Color
+
             else if (CUSTOM_FORMATTING.containsKey(code)) {
                 int color = CUSTOM_FORMATTING.get(code);
                 segment.withStyle(s -> s.withColor(color));
             }
-            // 3. Fallback for vanilla
             else {
                 root.append(Component.literal("§" + part));
                 continue;
@@ -98,7 +97,7 @@ public class ChromaticColors {
 
                         registerCustomColor(codeChar, colorInt);
 
-                        // Optional: Log it so you can verify in the console during startup
+
                         LOGGER.info("Phoenix Colors: Mapping §{} to #{}", codeChar, hexPart);
                     }
                 } catch (Exception e) {

@@ -50,7 +50,7 @@ public abstract class MixinBakedGlyph {
 
         ci.cancel();
 
-        // 1. Transform Engine (Scaling)
+
         float scaleX = effect.getScaleX(x, y);
         float scaleY = effect.getScaleY(x, y);
         float uniformScale = effect.getScale(x, y);
@@ -69,14 +69,13 @@ public abstract class MixinBakedGlyph {
         float finalYUp = centerY - (charHalfHeight * scaleY) - 3.0f;
         float finalYDown = centerY + (charHalfHeight * scaleY) - 3.0f;
 
-        // 2. The "Short Word" Fix: Localized X
-        // Using a 160.0f window ensures the gradient repeats consistently
+
         float localizedX = x % 160.0f;
 
         int colorL = effect.getRenderColor(0, localizedX + this.left, y);
         int colorR = effect.getRenderColor(0, localizedX + this.right, y);
 
-        // Convert to 0.0-1.0 float for OpenGL
+
         float rL = ((colorL >> 16) & 0xFF) / 255.0f;
         float gL = ((colorL >> 8) & 0xFF) / 255.0f;
         float bL = (colorL & 0xFF) / 255.0f;
@@ -84,7 +83,7 @@ public abstract class MixinBakedGlyph {
         float gR = ((colorR >> 8) & 0xFF) / 255.0f;
         float bR = (colorR & 0xFF) / 255.0f;
 
-        // 3. Italics & Render
+
         float italicTop = italic ? 1.0F - 0.25F * (this.up - 3.0f) : 0.0F;
         float italicBottom = italic ? 1.0F - 0.25F * (this.down - 3.0f) : 0.0F;
 

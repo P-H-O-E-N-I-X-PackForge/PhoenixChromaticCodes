@@ -41,12 +41,12 @@ public class ModConfig {
                 "Discord is the effect you see on servers with boosts, that smooth gradient. This one needs exactly two hex codes to work properly."
         })
         public String[] customGradients = new String[] {
-                "w:1.0:1.0:wave:rainbow",        // Smooth rainbow wave
-                "s:0.0:2.5:shake:FFFFFF",       // White violent shaking
-                "p:1.0:2.0:pulse:FF0000,990000", // Red breathing pulse
-                "*:1.5:0.0:static_rainbow:rainbow", // Entire word cycles rainbow
-                "g:1.0:3.0:glitch:00FF00,005500", // Green matrix glitch
-                "y:2.5:0.0:none:FF0000,FFFF00,00FF00", // Static horizontal gradient
+                "w:1.0:1.0:wave:rainbow",
+                "s:0.0:2.5:shake:FFFFFF",
+                "p:1.0:2.0:pulse:FF0000,990000",
+                "*:1.5:0.0:static_rainbow:rainbow",
+                "g:1.0:3.0:glitch:00FF00,005500",
+                "y:2.5:0.0:none:FF0000,FFFF00,00FF00",
                 "^:1.0:0.0:discord:FC8EAC,8F00FF",
                 "#:0.0:2.0:breath:FF00FF",
                 "%:0.0:2.0:stretch:FF00FF"
