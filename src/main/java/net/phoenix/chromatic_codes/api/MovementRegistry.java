@@ -1,6 +1,7 @@
 package net.phoenix.chromatic_codes.api;
 
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
+import net.phoenix.chromatic_codes.api.effects.DynamicEffect;
 
 import java.util.HashMap;
 import java.util.List;

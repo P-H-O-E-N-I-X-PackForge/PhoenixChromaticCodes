@@ -1,6 +1,9 @@
-package net.phoenix.chromatic_codes.api;
+package net.phoenix.chromatic_codes.api.effects;
 
 import net.minecraft.resources.ResourceLocation;
+import net.phoenix.chromatic_codes.api.ChromaticEffects;
+import net.phoenix.chromatic_codes.api.ColorHelper;
+import net.phoenix.chromatic_codes.api.IChromaticEffect;
 
 public class GradientEffect implements IChromaticEffect {
 

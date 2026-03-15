@@ -1,4 +1,7 @@
-package net.phoenix.chromatic_codes.api;
+package net.phoenix.chromatic_codes.api.effects;
+
+import net.phoenix.chromatic_codes.api.ColorHelper;
+import net.phoenix.chromatic_codes.api.IChromaticEffect;
 
 import java.util.List;
 

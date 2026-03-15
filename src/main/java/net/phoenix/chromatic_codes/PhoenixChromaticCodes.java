@@ -1,12 +1,12 @@
 package net.phoenix.chromatic_codes;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.phoenix.chromatic_codes.api.*;
+import net.phoenix.chromatic_codes.api.effects.*;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,26 +21,34 @@ public class PhoenixChromaticCodes {
     public PhoenixChromaticCodes(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
+        // Load config early
         ModConfig.init();
 
-        MovementRegistry.register("wave", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "wave"));
-        MovementRegistry.register("shake", ShiverEffect::new);
-        MovementRegistry.register("none", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "none"));
-        MovementRegistry.register("pulse", PulseEffect::new);
-        MovementRegistry.register("static_rainbow", StaticRainbowEffect::new);
-        MovementRegistry.register("glitch", GlitchEffect::new);
-
-        // 2. SECOND: Now init the registry so it can find the types above
-        ChromaticEffectsRegistry.init();
-
-        ChromaticColors.init();
-
+        // Register the setup listener
         modEventBus.addListener(this::commonSetup);
-        MinecraftForge.EVENT_BUS.register(this);
+
+        // No need to register 'this' to Forge bus if there are no @SubscribeEvent methods here
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Phoenix's Chromatic Codes is heating up!");
+        // Enqueue registry work to be thread-safe
+        event.enqueueWork(() -> {
+            MovementRegistry.register("wave", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "wave"));
+            MovementRegistry.register("shake", ShiverEffect::new);
+            MovementRegistry.register("none", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "none"));
+            MovementRegistry.register("pulse", PulseEffect::new);
+            MovementRegistry.register("static_rainbow", StaticRainbowEffect::new);
+            MovementRegistry.register("glitch", GlitchEffect::new);
+            MovementRegistry.register("discord", DiscordGradientEffect::new);
+            MovementRegistry.register("breath", BreathEffect::new);
+            MovementRegistry.register("stretch", StretchEffect::new);
+            MovementRegistry.register("phoenix", PhoenixEffect::new);
+
+            ChromaticEffectsRegistry.init();
+            ChromaticColors.init();
+
+            LOGGER.info("Phoenix's Chromatic Codes is heating up!");
+        });
     }
 
     public static ResourceLocation id(String path) {

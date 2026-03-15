@@ -8,14 +8,20 @@ import java.util.Map;
 
 public class ChromaticAPI {
 
-    // Maps a character (e.g., 'w') to the Logic (IChromaticEffect)
     private static final Map<Character, IChromaticEffect> EFFECTS = new HashMap<>();
-
-    // Maps a Font ResourceLocation to the Logic (Used by the Renderer Mixin)
     private static final Map<ResourceLocation, IChromaticEffect> FONT_TO_EFFECT = new HashMap<>();
-
-    // Maps a character to a Font (Used by the Decomposer Mixin)
     private static final Map<Character, ResourceLocation> CODE_TO_FONT = new HashMap<>();
+
+    // The Bridge: Stores the effect being rendered on the current thread
+    private static final ThreadLocal<IChromaticEffect> CURRENT_EFFECT = new ThreadLocal<>();
+
+    public static void setCurrentEffect(IChromaticEffect effect) {
+        CURRENT_EFFECT.set(effect);
+    }
+
+    public static IChromaticEffect getCurrentEffect() {
+        return CURRENT_EFFECT.get();
+    }
 
     public static void registerEffect(char code, ResourceLocation font, IChromaticEffect effect) {
         char lower = Character.toLowerCase(code);
