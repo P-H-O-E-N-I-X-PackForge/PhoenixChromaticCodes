@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GlitchEffect implements IChromaticEffect {
-
     private final List<Integer> colors;
     private final float colorSpeed;
     private final float moveSpeed;
@@ -29,13 +28,11 @@ public class GlitchEffect implements IChromaticEffect {
 
     @Override
     public float getXOffset(float x, float y) {
-        return (ThreadLocalRandom.current().nextFloat() < 0.05f * moveSpeed) ?
-                (ThreadLocalRandom.current().nextFloat() - 0.5f) * 4f : 0;
+        return (ThreadLocalRandom.current().nextFloat() < 0.05f * moveSpeed) ? (ThreadLocalRandom.current().nextFloat() - 0.5f) * 4f : 0;
     }
 
     @Override
     public float getYOffset(float x, float y) {
-        return (ThreadLocalRandom.current().nextFloat() < 0.05f * moveSpeed) ?
-                (ThreadLocalRandom.current().nextFloat() - 0.5f) * 4f : 0;
+        return (ThreadLocalRandom.current().nextFloat() < 0.05f * moveSpeed) ? (ThreadLocalRandom.current().nextFloat() - 0.5f) * 4f : 0;
     }
 }

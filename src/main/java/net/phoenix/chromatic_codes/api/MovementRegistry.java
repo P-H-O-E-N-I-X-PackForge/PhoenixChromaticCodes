@@ -7,8 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MovementRegistry {
 
+
+public class MovementRegistry {
     private static final Map<String, MovementFactory> REGISTRY = new HashMap<>();
 
     public static void register(String id, MovementFactory factory) {
@@ -29,7 +30,6 @@ public class MovementRegistry {
 
     @FunctionalInterface
     public interface MovementFactory {
-
         IChromaticEffect build(float colorSpeed, float moveSpeed, List<Integer> colors);
     }
 }

@@ -19,7 +19,6 @@ public class ColorHelper {
 
         return (r << 16) | (g << 8) | b;
     }
-
     public static int getGradientColor(List<Integer> colors, float speed, float xPos) {
         if (colors.isEmpty()) return 0xFFFFFF;
         if (colors.size() == 1) return colors.get(0);
