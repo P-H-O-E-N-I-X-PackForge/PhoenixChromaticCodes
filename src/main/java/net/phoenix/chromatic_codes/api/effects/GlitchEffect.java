@@ -20,6 +20,7 @@ public class GlitchEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int original, float x, float y) {
+        // Flickers between colors rapidly based on speed
         if (moveSpeed > 0 && ThreadLocalRandom.current().nextFloat() < (0.1f * moveSpeed)) {
             return colors.get(ThreadLocalRandom.current().nextInt(colors.size()));
         }

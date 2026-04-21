@@ -15,6 +15,8 @@ public class DiscordGradientEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int original, float x, float y) {
+        // If it transitions too fast, divide x by a larger number here
+        // to "slow down" the color change across the string.
         return ColorHelper.getDiscordGradient(colors, x);
     }
 

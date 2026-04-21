@@ -33,6 +33,7 @@ public class DynamicEffect implements IChromaticEffect {
     public float getYOffset(float x, float y) {
         if (movementType.equals("wave")) {
             long time = System.currentTimeMillis() % 1000000L;
+            // moveSpeed now controls the wave's vertical frequency
             return (float) Math.sin((time / 150.0) * moveSpeed + (x * 0.1)) * 1.5f;
         }
         return 0;

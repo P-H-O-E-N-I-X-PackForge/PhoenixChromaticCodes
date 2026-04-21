@@ -21,6 +21,7 @@ public class StretchEffect implements IChromaticEffect {
 
     @Override
     public float getScale(float x, float y) {
+        // Pulsates size between 0.8 and 1.3
         float wave = (float) Math.sin((System.currentTimeMillis() / 500.0) * pulseSpeed);
         return 1.0f + (wave * 0.25f);
     }

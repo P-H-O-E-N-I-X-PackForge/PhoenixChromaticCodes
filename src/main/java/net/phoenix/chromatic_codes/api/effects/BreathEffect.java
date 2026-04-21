@@ -19,6 +19,7 @@ public class BreathEffect implements IChromaticEffect {
     public int getRenderColor(int original, float x, float y) {
         int baseColor = colors.get(0);
         float wave = (float) (Math.sin(System.currentTimeMillis() * 0.005 * pulseSpeed) + 1.0) / 2.0f;
+        // Make it glow brighter as it gets bigger
         return ColorHelper.lerp(0x333333, baseColor, 0.5f + (wave * 0.5f));
     }
 

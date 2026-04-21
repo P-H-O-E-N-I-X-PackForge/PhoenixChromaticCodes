@@ -24,13 +24,15 @@ public abstract class MixinLiteralContents {
             cancellable = true)
     private <T> void phoenix$decomposeLiteral(FormattedText.StyledContentConsumer<T> consumer, Style style,
                                               CallbackInfoReturnable<Optional<T>> cir) {
-
+        // Access the text from the record.
+        // Since LiteralContents is a record, we use the accessor method 'text()'
         String rawText = ((LiteralContents) (Object) this).text();
 
-
+        // Convert & to § before processing
         String processed = rawText.replace('&', '\u00a7');
 
-
+        // This call triggers your MixinStringDecomposer!
+        // It breaks the string into pieces, each with the correct Font/Color.
         boolean finished = StringDecomposer.iterateFormatted(processed, style, (pos, currentStyle, codePoint) -> {
             String charStr = new String(Character.toChars(codePoint));
             return consumer.accept(currentStyle, charStr).isEmpty();
