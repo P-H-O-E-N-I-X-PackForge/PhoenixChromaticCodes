@@ -33,6 +33,13 @@ repositories {
         url "https://maven.firstdark.dev/snapshots/"
     }
     maven {
+        url = "https://maven.architectury.dev"
+    }
+    maven {
+        name = "ftbMavenReleases"
+        url = uri("https://maven.ftb.dev/releases")
+    }
+    maven {
         name = "BlameJared"
         url = "https://maven.blamejared.com/"
     }
@@ -114,6 +121,11 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    modRuntimeOnly("dev.architectury:architectury-forge:${architectury_version}")
+    modImplementation("dev.ftb.mods:ftb-library-forge:${ftblibrary_version}")
+    modImplementation("dev.ftb.mods:ftb-teams-forge:${ftbteams_version}")
+    modImplementation("dev.ftb.mods:ftb-quests-forge:${ftbquests_version}")
 }
 
 // This block tells the MixinGradle tool to generate the translation map for obfuscated environments

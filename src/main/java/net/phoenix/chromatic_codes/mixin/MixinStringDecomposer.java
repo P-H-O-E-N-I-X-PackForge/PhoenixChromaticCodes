@@ -8,7 +8,7 @@ import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.StringDecomposer;
 import net.phoenix.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
-
+import net.phoenix.chromatic_codes.api.RenderContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,13 +17,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(StringDecomposer.class)
 public class MixinStringDecomposer {
 
-    @Inject(method = "iterateFormatted(Ljava/lang/String;ILnet/minecraft/network/chat/Style;Lnet/minecraft/network/chat/Style;Lnet/minecraft/util/FormattedCharSink;)Z",
+    @Inject(
+            method = "iterateFormatted(Ljava/lang/String;ILnet/minecraft/network/chat/Style;Lnet/minecraft/network/chat/Style;Lnet/minecraft/util/FormattedCharSink;)Z",
             at = @At("HEAD"),
-            cancellable = true)
+            cancellable = true
+    )
     private static void phoenix$injectCustomStyles(String text, int skip, Style currentStyle, Style defaultStyle,
                                                    FormattedCharSink sink, CallbackInfoReturnable<Boolean> cir) {
 
-        if (text.indexOf('\u00a7') == -1) return;
+        if (text.indexOf('§') == -1) return;
 
         int len = text.length();
         Style style = currentStyle;
@@ -31,48 +33,48 @@ public class MixinStringDecomposer {
         for (int j = skip; j < len; ++j) {
             char c0 = text.charAt(j);
 
-            if (c0 == '\u00a7' && j + 1 < len) {
-                char c1 = Character.toLowerCase(text.charAt(j + 1));
+            if (c0 == '§' && j + 1 < len) {
+                char code = Character.toLowerCase(text.charAt(j + 1));
 
-
-                ResourceLocation effectFont = ChromaticAPI.getFontForCode(c1);
-                if (effectFont != null) {
-                    style = style.withFont(effectFont).withColor((TextColor) null);
+                // 🎨 Custom font effect
+                ResourceLocation font = ChromaticAPI.getFontForCode(code);
+                if (font != null) {
+                    style = style.withFont(font).withColor((TextColor) null);
                     j++;
                     continue;
                 }
 
-
-                if (ChromaticColors.CUSTOM_FORMATTING.containsKey(c1)) {
-
-                    ChromaticColors.LAST_CODE.set(c1);
-
-
-                    int hex = ChromaticColors.CUSTOM_FORMATTING.get(c1);
+                // 🌈 Custom color
+                if (ChromaticColors.CUSTOM_FORMATTING.containsKey(code)) {
+                    int hex = ChromaticColors.CUSTOM_FORMATTING.get(code);
                     style = style.withColor(TextColor.fromRgb(hex));
                     j++;
                     continue;
                 }
 
-
-                ChatFormatting cf = ChatFormatting.getByCode(c1);
+                // 🧱 Vanilla fallback
+                ChatFormatting cf = ChatFormatting.getByCode(code);
                 if (cf != null) {
                     if (cf == ChatFormatting.RESET) {
-                        style = defaultStyle;
-                        ChromaticColors.LAST_CODE.set(' ');
+                        style = defaultStyle.withFont(Style.DEFAULT_FONT);
                     } else {
                         style = style.applyLegacyFormat(cf);
+                        if (cf.isColor()) {
+                            style = style.withFont(Style.DEFAULT_FONT);
+                        }
                     }
                 }
-                j++;
-            } else {
 
-                if (!sink.accept(j, style, c0)) {
-                    cir.setReturnValue(false);
-                    return;
-                }
+                j++;
+                continue;
+            }
+
+            if (!sink.accept(j, style, c0)) {
+                cir.setReturnValue(false);
+                return;
             }
         }
+
         cir.setReturnValue(true);
     }
 }
