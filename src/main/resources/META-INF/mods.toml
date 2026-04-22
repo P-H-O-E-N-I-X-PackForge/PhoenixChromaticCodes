@@ -9,7 +9,7 @@ license = "${mod_license}"
 
 [[mods]]
 modId = "phoenix_chromatic_codes"
-version = "${version}"
+version = "1.10"
 displayName = "PhoenixChromaticCodes"
 displayURL = "${mod_url}"
 # This will be displayed as your mod's logo in the Mods panel.
@@ -18,7 +18,7 @@ displayURL = "${mod_url}"
 # credits="Thanks to Mojang for making this great game" #optional
 # Some more fluff displayed in the Mods panel. Plug your stuff here!
 authors="${mod_author}"
-description = '''This is the Core mod for phoenix_core'''
+description = '''A mod focused on adding custom color codes and effects.'''
 
 [[dependencies.phoenix_chromatic_codes]]
 modId = "forge"

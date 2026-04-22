@@ -3,13 +3,16 @@
   "package": "net.phoenix.chromatic_codes.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "phoenix_chromatic_codes.refmap.json",
+  "plugin": "net.phoenix.chromatic_codes.mixin.FTBCompatibilityPlugin",
   "priority": 2000,
   "minVersion": "0.8",
   "mixins": [
     "MixinChatFormatting",
     "MixinLiteralContents",
     "MixinStringDecomposer",
-    "MixinTextColor"
+    "MixinTextColor",
+    "MixinFTBStringUtils",
+    "MixinFTBTextUtils"
   ],
   "client": [
     "MixinBakedGlyph",

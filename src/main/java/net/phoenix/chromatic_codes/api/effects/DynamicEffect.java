@@ -6,6 +6,7 @@ import net.phoenix.chromatic_codes.api.IChromaticEffect;
 import java.util.List;
 
 public class DynamicEffect implements IChromaticEffect {
+
     private final List<Integer> colors;
     private final float colorSpeed;
     private final float moveSpeed;
@@ -24,7 +25,9 @@ public class DynamicEffect implements IChromaticEffect {
     }
 
     @Override
-    public float getXOffset(float x, float y) { return 0; }
+    public float getXOffset(float x, float y) {
+        return 0;
+    }
 
     @Override
     public float getYOffset(float x, float y) {

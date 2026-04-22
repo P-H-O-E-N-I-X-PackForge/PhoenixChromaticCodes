@@ -2,7 +2,6 @@ package net.phoenix.chromatic_codes.api;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.phoenix.ChromaticAPI;
@@ -17,10 +16,7 @@ import static net.phoenix.chromatic_codes.api.ChromaticColors.CUSTOM_FORMATTING;
 public class ChromaticEffectsRegistry {
 
     public static void init() {
-        // Initialize static hex colors
         ChromaticColors.init();
-
-        // Parse and register the dynamic gradients/movements
         parseAndRegister(ModConfig.INSTANCE.colors.customGradients);
     }
 
@@ -43,12 +39,14 @@ public class ChromaticEffectsRegistry {
 
                 IChromaticEffect effect = MovementRegistry.create(movementId, colorSpeed, moveSpeed, colors);
 
-                // FIX: Map "none" to a custom ResourceLocation instead of Style.DEFAULT_FONT
-                // This ensures the Mixin sees the 'phoenix_chromatic_codes' namespace and applies the gradient
-                ResourceLocation fontId = PhoenixChromaticCodes.id(movementId);
+                // Use the character's decimal codepoint as the font path.
+                // This ensures the ResourceLocation is always valid regardless of what
+                // character the user picks — e.g. '^' (94) → phoenix_chromatic_codes:code_94
+                // ResourceLocation paths only allow [a-z0-9/._-], so raw chars like ^ * # % + break it.
+                ResourceLocation fontId = PhoenixChromaticCodes.id("code_" + (int) Character.toLowerCase(code));
 
-                // Check your latest.log for this line to confirm it registered as phoenix_chromatic_codes:none [cite: 1, 2, 3]
-                PhoenixChromaticCodes.LOGGER.info("Phoenix Chromatic: Registering §{} with effect {} on font {}", code, movementId, fontId);
+                PhoenixChromaticCodes.LOGGER.info("Phoenix Chromatic: Registering §{} with effect {} on font {}", code,
+                        movementId, fontId);
 
                 ChromaticAPI.registerEffect(code, fontId, effect);
             } catch (Exception e) {
@@ -85,10 +83,9 @@ public class ChromaticEffectsRegistry {
             ResourceLocation dynamicFont = ChromaticAPI.getFontForCode(code);
 
             if (dynamicFont != null) {
-                // Apply the font and STRIP existing color so the Mixin can inject the gradient
-                segment.withStyle(style -> style.withFont(dynamicFont).withColor((TextColor) null));
+                segment = segment.withStyle(style -> style.withFont(dynamicFont).withColor((TextColor) null));
             } else if (CUSTOM_FORMATTING.containsKey(code)) {
-                segment.withStyle(style -> style.withColor(TextColor.fromRgb(CUSTOM_FORMATTING.get(code))));
+                segment = segment.withStyle(style -> style.withColor(TextColor.fromRgb(CUSTOM_FORMATTING.get(code))));
             } else {
                 root.append(Component.literal("§" + part));
                 continue;

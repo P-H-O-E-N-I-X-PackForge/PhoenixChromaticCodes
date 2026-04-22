@@ -4,7 +4,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.phoenix.ChromaticAPI;
-import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
 import org.apache.logging.log4j.LogManager;
@@ -62,12 +61,12 @@ public class ChromaticColors {
             // 1. Check if it's a Dynamic Effect (Wave/Shake/Gradient)
             ResourceLocation dynamicFont = ChromaticAPI.getFontForCode(code);
             if (dynamicFont != null) {
-                segment.withStyle(s -> s.withFont(dynamicFont));
+                segment = segment.withStyle(s -> s.withFont(dynamicFont));
             }
             // 2. Check if it's a Static Custom Color
             else if (CUSTOM_FORMATTING.containsKey(code)) {
                 int color = CUSTOM_FORMATTING.get(code);
-                segment.withStyle(s -> s.withColor(color));
+                segment = segment.withStyle(s -> s.withColor(color));
             }
             // 3. Fallback for vanilla
             else {
@@ -78,7 +77,6 @@ public class ChromaticColors {
         }
         return root;
     }
-
 
     public static void init() {
         String[] colorSettings = ModConfig.INSTANCE.colors.customColors;

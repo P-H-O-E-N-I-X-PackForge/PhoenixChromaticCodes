@@ -41,6 +41,13 @@ repositories {
         content {
             includeGroup("com.tterrag.registrate")
         }
+        maven {
+            name = "ftbMavenReleases"
+            url = uri("https://maven.ftb.dev/releases")
+        }
+        maven {
+            url = "https://maven.architectury.dev"
+        }
     }
 }
 
@@ -112,8 +119,15 @@ dependencies {
 
      jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
 
+    modCompileOnly("dev.architectury:architectury-forge:${architectury_version}")
+    modCompileOnly("dev.ftb.mods:ftb-library-forge:${ftblibrary_version}")
+    modCompileOnly("dev.ftb.mods:ftb-teams-forge:${ftbteams_version}")
+    modCompileOnly("dev.ftb.mods:ftb-quests-forge:${ftbquests_version}")
+
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+
 }
 
 // This block tells the MixinGradle tool to generate the translation map for obfuscated environments
