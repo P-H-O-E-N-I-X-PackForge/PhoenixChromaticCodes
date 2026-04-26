@@ -30,6 +30,8 @@ public class PhoenixChromaticCodes {
         MovementRegistry.register("pulse", PulseEffect::new);
         MovementRegistry.register("static_rainbow", StaticRainbowEffect::new);
         MovementRegistry.register("glitch", GlitchEffect::new);
+        MovementRegistry.register("breath", BreathEffect::new);
+        MovementRegistry.register("stretch", StretchEffect::new);
 
         // 2. SECOND: Now init the registry so it can find the types above
         ChromaticEffectsRegistry.init();

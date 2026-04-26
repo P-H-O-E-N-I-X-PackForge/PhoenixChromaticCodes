@@ -19,11 +19,19 @@ public class StretchEffect implements IChromaticEffect {
         return colors.get(0);
     }
 
+    /**
+     * Stretch only affects the X axis — text squishes and widens horizontally.
+     * getScaleY stays at the IChromaticEffect default of 1.0f (no vertical change).
+     */
+    @Override
+    public float getScaleX(float x, float y) {
+        float wave = (float) Math.sin((System.currentTimeMillis() / 500.0) * pulseSpeed);
+        return 1.0f + (wave * 0.5f);
+    }
+
     @Override
     public float getScale(float x, float y) {
-        // Pulsates size between 0.8 and 1.3
-        float wave = (float) Math.sin((System.currentTimeMillis() / 500.0) * pulseSpeed);
-        return 1.0f + (wave * 0.25f);
+        return 1.0f; // disable uniform scale so getScaleX takes effect
     }
 
     @Override

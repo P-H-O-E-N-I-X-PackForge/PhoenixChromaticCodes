@@ -26,6 +26,7 @@ mandatory = true
 versionRange = "[${forge_version},)"
 ordering = "NONE"
 side = "BOTH"
+
 [[dependencies.phoenix_chromatic_codes]]
 modId = "minecraft"
 mandatory = true
@@ -33,3 +34,37 @@ versionRange = "[${minecraft_version},)"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies.phoenix_chromatic_codes]]
+modId = "configuration"
+mandatory = true
+versionRange = "[${configuration_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.phoenix_chromatic_codes]]
+modId = "architectury"
+mandatory = false
+versionRange = "[${architectury_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.phoenix_chromatic_codes]]
+modId = "ftblibrary"
+mandatory = false
+versionRange = "[${ftblibrary_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.phoenix_chromatic_codes]]
+modId = "ftbteams"
+mandatory = false
+versionRange = "[${ftbteams_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.phoenix_chromatic_codes]]
+modId = "ftbquests"
+mandatory = false
+versionRange = "[${ftbquests_version},)"
+ordering = "NONE"
+side = "BOTH"

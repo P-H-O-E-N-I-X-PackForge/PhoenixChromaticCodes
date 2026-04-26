@@ -31,7 +31,8 @@ public class MixinStringDecomposer {
             if (text.charAt(i) == '\u00a7') {
                 char next = Character.toLowerCase(text.charAt(i + 1));
                 if (ChromaticAPI.getFontForCode(next) != null ||
-                        ChromaticColors.CUSTOM_FORMATTING.containsKey(next)) {
+                        ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
+                        next == '[') { // bracket codes always need our loop
                     hasCustomCode = true;
                     break;
                 }
@@ -62,7 +63,30 @@ public class MixinStringDecomposer {
                     }
                 }
 
-                // 2. Check for Dynamic Effects (Wave, Shake, etc.)
+                // 2. Named bracket codes: §[name]
+                if (c1 == '[') {
+                    int closeIdx = text.indexOf(']', j + 2);
+                    if (closeIdx != -1) {
+                        String name = text.substring(j + 2, closeIdx);
+
+                        ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
+                        if (namedFont != null) {
+                            style = style.withFont(namedFont).withColor((TextColor) null);
+                            j = closeIdx; // skip past the ']'; outer ++j handles the rest
+                            continue;
+                        }
+
+                        if (ChromaticColors.NAMED_CUSTOM_FORMATTING.containsKey(ChromaticAPI.normalizeNamedKey(name))) {
+                            int hex = ChromaticColors.NAMED_CUSTOM_FORMATTING.get(ChromaticAPI.normalizeNamedKey(name));
+                            style = style.withColor(TextColor.fromRgb(hex));
+                            j = closeIdx;
+                            continue;
+                        }
+                        // Unknown bracket code — fall through and let vanilla skip it
+                    }
+                }
+
+                // 3. Check for Dynamic Effects (Wave, Shake, etc.)
                 ResourceLocation effectFont = ChromaticAPI.getFontForCode(c1);
                 if (effectFont != null) {
                     style = style.withFont(effectFont).withColor((TextColor) null);
@@ -70,7 +94,7 @@ public class MixinStringDecomposer {
                     continue;
                 }
 
-                // 3. Check for Custom Hex Colors (z, p, etc.)
+                // 4. Check for Custom Hex Colors (z, p, etc.)
                 if (ChromaticColors.CUSTOM_FORMATTING.containsKey(c1)) {
                     ChromaticColors.LAST_CODE.set(c1);
                     int hex = ChromaticColors.CUSTOM_FORMATTING.get(c1);
@@ -79,7 +103,7 @@ public class MixinStringDecomposer {
                     continue;
                 }
 
-                // 4. Fallback to Vanilla Formatting
+                // 5. Fallback to Vanilla Formatting
                 ChatFormatting cf = ChatFormatting.getByCode(c1);
                 if (cf != null) {
                     if (cf == ChatFormatting.RESET) {

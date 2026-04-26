@@ -21,6 +21,9 @@ public class MixinFTBStringUtils {
 
     @Inject(method = "<clinit>", at = @At("RETURN"), remap = false)
     private static void phoenix$expandFormattingPattern(CallbackInfo ci) {
-        FORMATTING_CODE_PATTERN = Pattern.compile("(?i)[\\&\\u00a7](.)");
+        // Matches §/& followed by any character EXCEPT # and $, which have
+        // special meaning in FTB Quests (task/reward references etc.) and must
+        // be left alone by our pipeline so FTB can handle them itself.
+        FORMATTING_CODE_PATTERN = Pattern.compile("(?i)[\\&\\u00a7]([^#$])");
     }
 }

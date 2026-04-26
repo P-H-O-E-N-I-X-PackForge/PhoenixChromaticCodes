@@ -30,9 +30,6 @@ public abstract class MixinLiteralContents {
 
         String processed = phoenix$replaceCustomAmpersands(rawText);
 
-        // Track whether the consumer returned a non-empty result (early stop).
-        // We cannot cast Boolean.FALSE to T — that causes ClassCastException.
-        // Instead, capture the actual Optional<T> the consumer returned and propagate it.
         @SuppressWarnings("unchecked")
         Optional<T>[] stopResult = new Optional[] { null };
 
@@ -57,7 +54,8 @@ public abstract class MixinLiteralContents {
                 char next = Character.toLowerCase(s.charAt(i + 1));
                 if (ChromaticAPI.isRegistered(next) ||
                         ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
-                        ChatFormatting.getByCode(next) != null) {  // <-- this is what's missing
+                        ChatFormatting.getByCode(next) != null ||
+                        next == '[') { // bracket codes
                     return true;
                 }
             }
@@ -75,13 +73,27 @@ public abstract class MixinLiteralContents {
             if (c == '&' && i + 1 < s.length()) {
                 char next = s.charAt(i + 1);
                 char lower = Character.toLowerCase(next);
-                if (ChromaticAPI.isRegistered(lower) ||
+
+                // Named bracket code: &[name] → §[name]
+                if (lower == '[') {
+                    int closeIdx = s.indexOf(']', i + 2);
+                    if (closeIdx != -1) {
+                        String name = s.substring(i + 2, closeIdx);
+                        if (ChromaticAPI.isNamedRegistered(name) ||
+                                ChromaticColors.NAMED_CUSTOM_FORMATTING
+                                        .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
+                            sb.append('§').append(s, i + 1, closeIdx + 1);
+                            i = closeIdx;
+                            continue;
+                        }
+                    }
+                } else if (ChromaticAPI.isRegistered(lower) ||
                         ChromaticColors.CUSTOM_FORMATTING.containsKey(lower) ||
-                        ChatFormatting.getByCode(lower) != null) {  // <-- add this
-                    sb.append('§').append(next);
-                    i++;
-                    continue;
-                }
+                        ChatFormatting.getByCode(lower) != null) {
+                            sb.append('§').append(next);
+                            i++;
+                            continue;
+                        }
             }
             sb.append(c);
         }

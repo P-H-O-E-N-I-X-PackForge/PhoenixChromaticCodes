@@ -15,11 +15,16 @@ import java.util.Map;
 public class ChromaticColors {
 
     public static final Map<Character, Integer> CUSTOM_FORMATTING = new HashMap<>();
+    public static final Map<String, Integer> NAMED_CUSTOM_FORMATTING = new HashMap<>();
     public static final ThreadLocal<Character> LAST_CODE = ThreadLocal.withInitial(() -> ' ');
     public static final Logger LOGGER = LogManager.getLogger();
 
     public static void registerCustomColor(char code, int hex) {
         CUSTOM_FORMATTING.put(Character.toLowerCase(code), hex);
+    }
+
+    public static void registerNamedColor(String name, int hex) {
+        NAMED_CUSTOM_FORMATTING.put(ChromaticAPI.normalizeNamedKey(name), hex);
     }
 
     public static void loadColorsFromConfig() {
@@ -79,12 +84,11 @@ public class ChromaticColors {
     }
 
     public static void init() {
+        // --- Single-char colors ---
         String[] colorSettings = ModConfig.INSTANCE.colors.customColors;
-
         if (colorSettings != null) {
             for (String entry : colorSettings) {
                 if (entry == null || !entry.contains(":")) continue;
-
                 try {
                     String[] parts = entry.split(":", 2);
                     if (parts.length < 2) continue;
@@ -95,14 +99,36 @@ public class ChromaticColors {
                     if (!codePart.isEmpty() && !hexPart.isEmpty()) {
                         char codeChar = codePart.charAt(0);
                         int colorInt = Integer.parseInt(hexPart, 16);
-
                         registerCustomColor(codeChar, colorInt);
-
-                        // Optional: Log it so you can verify in the console during startup
                         LOGGER.info("Phoenix Colors: Mapping §{} to #{}", codeChar, hexPart);
                     }
                 } catch (Exception e) {
                     LOGGER.error("Phoenix Core: Failed to parse color config entry '{}'", entry);
+                }
+            }
+        }
+
+        // --- Named bracket colors ---
+        String[] namedColorSettings = ModConfig.INSTANCE.colors.namedColors;
+        if (namedColorSettings != null) {
+            for (String entry : namedColorSettings) {
+                if (entry == null || entry.isEmpty()) continue;
+                try {
+                    // Format: "[name]:hex"
+                    if (!entry.startsWith("[")) continue;
+                    int bracket = entry.indexOf(']');
+                    if (bracket < 2) continue;
+
+                    String name = entry.substring(1, bracket);
+                    // +1 for ']', +1 for ':'
+                    if (bracket + 2 > entry.length()) continue;
+                    String hexPart = entry.substring(bracket + 2).replace("#", "").trim();
+
+                    int colorInt = Integer.parseInt(hexPart, 16);
+                    registerNamedColor(name, colorInt);
+                    LOGGER.info("Phoenix Colors: Mapping §[{}] to #{}", name, hexPart);
+                } catch (Exception e) {
+                    LOGGER.error("Phoenix Core: Failed to parse named color config entry '{}'", entry);
                 }
             }
         }
