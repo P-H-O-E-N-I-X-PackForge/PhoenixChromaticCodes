@@ -1,7 +1,7 @@
 package net.phoenix.chromatic_codes.mixin;
 
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;

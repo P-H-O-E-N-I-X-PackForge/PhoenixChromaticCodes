@@ -19,8 +19,41 @@ public class DynamicEffect implements IChromaticEffect {
         this.movementType = movementType;
     }
 
+    /**
+     * "none" is a passthrough effect: MixinBakedGlyph steps aside entirely and
+     * lets vanilla render the glyph. MixinStringRenderOutput still calls
+     * getRenderColor() via applyApiEffects() and bakes the result into the Style
+     * color before vanilla sees it, so the gradient is preserved — it's just a
+     * flat, frozen gradient with zero per-frame animation or vertex transforms.
+     */
+    @Override
+    public boolean isPassthrough() {
+        return "none".equals(this.movementType);
+    }
+
+    /**
+     * Horizontal blending makes sense for animated types ("wave") where adjacent
+     * letter edges need different hues for a smooth flow. "none" is passthrough
+     * so this flag is irrelevant for it, but we return false anyway for clarity.
+     */
+    @Override
+    public boolean useHorizontalBlending() {
+        return !"none".equals(this.movementType);
+    }
+
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
+        if ("none".equals(this.movementType)) {
+            // applyApiEffects passes raw screen X. We don't use getSegmentStartX()
+            // because it may not be set in all rendering contexts. Instead modulo
+            // a cycle width so the gradient spreads naturally across the word.
+            float cycleWidth = (this.colorSpeed > 0 ? this.colorSpeed : 1.0f) * 128.0f;
+            float pos = x % cycleWidth;
+            if (pos < 0) pos += cycleWidth;
+            return ColorHelper.getGradientColor(colors, 0.0f, pos * 0.4f);
+        }
+
+        // Animated types pass through normally
         return ColorHelper.getGradientColor(colors, colorSpeed, x);
     }
 
@@ -31,9 +64,8 @@ public class DynamicEffect implements IChromaticEffect {
 
     @Override
     public float getYOffset(float x, float y) {
-        if (movementType.equals("wave")) {
+        if ("wave".equals(movementType)) {
             long time = System.currentTimeMillis() % 1000000L;
-            // moveSpeed now controls the wave's vertical frequency
             return (float) Math.sin((time / 150.0) * moveSpeed + (x * 0.1)) * 1.5f;
         }
         return 0;

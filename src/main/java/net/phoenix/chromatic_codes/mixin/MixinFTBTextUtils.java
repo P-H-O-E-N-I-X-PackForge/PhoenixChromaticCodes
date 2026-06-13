@@ -1,7 +1,7 @@
 package net.phoenix.chromatic_codes.mixin;
 
 import net.minecraft.network.chat.Component;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
 
 import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
@@ -55,6 +55,7 @@ public class MixinFTBTextUtils {
                 if (FTB_RESERVED.indexOf(next) != -1) continue;
                 if (ChromaticAPI.isRegistered(next) ||
                         ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
+                        ChromaticAPI.isOutlineCode(next) ||
                         next == '[') {
                     return true;
                 }
@@ -80,6 +81,7 @@ public class MixinFTBTextUtils {
                     if (closeIdx != -1) {
                         String name = str.substring(i + 2, closeIdx);
                         if (ChromaticAPI.isNamedRegistered(name) ||
+                                ChromaticAPI.isNamedOutlineCode(name) ||
                                 ChromaticColors.NAMED_CUSTOM_FORMATTING
                                         .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
                             sb.append('§').append(str, i + 1, closeIdx + 1);
@@ -116,10 +118,11 @@ public class MixinFTBTextUtils {
         return sb.toString();
     }
 
-    /** True if this char is one of our registered chromatic/custom codes (not a vanilla code). */
+    /** True if this char is one of our registered chromatic/custom/outline codes (not a vanilla code). */
     @Unique
     private static boolean phoenixChromaticCodes$isOurCode(char lower) {
-        return ChromaticAPI.isRegistered(lower) || ChromaticColors.CUSTOM_FORMATTING.containsKey(lower);
+        return ChromaticAPI.isRegistered(lower) || ChromaticColors.CUSTOM_FORMATTING.containsKey(lower) ||
+                ChromaticAPI.isOutlineCode(lower);
     }
 
     @Unique

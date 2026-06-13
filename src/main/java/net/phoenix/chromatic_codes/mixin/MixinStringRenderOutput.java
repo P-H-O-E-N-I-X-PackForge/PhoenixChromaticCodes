@@ -2,7 +2,7 @@ package net.phoenix.chromatic_codes.mixin;
 
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
 
 import org.spongepowered.asm.mixin.Mixin;

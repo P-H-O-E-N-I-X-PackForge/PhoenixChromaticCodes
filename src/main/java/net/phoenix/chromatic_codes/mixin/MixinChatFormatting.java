@@ -1,7 +1,7 @@
 package net.phoenix.chromatic_codes.mixin;
 
 import net.minecraft.ChatFormatting;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

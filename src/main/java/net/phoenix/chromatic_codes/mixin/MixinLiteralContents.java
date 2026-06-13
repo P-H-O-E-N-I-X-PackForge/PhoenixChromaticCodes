@@ -1,11 +1,10 @@
 package net.phoenix.chromatic_codes.mixin;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.util.StringDecomposer;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,14 +49,22 @@ public abstract class MixinLiteralContents {
     private static boolean phoenix$containsActionableCode(String s) {
         for (int i = 0; i < s.length() - 1; i++) {
             char c = s.charAt(i);
-            if (c == '§' || c == '&') {
-                char next = Character.toLowerCase(s.charAt(i + 1));
-                if (ChromaticAPI.isRegistered(next) ||
-                        ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
-                        ChatFormatting.getByCode(next) != null ||
-                        next == '[') { // bracket codes
-                    return true;
-                }
+            char next = Character.toLowerCase(s.charAt(i + 1));
+
+            boolean isCustomCode = ChromaticAPI.isRegistered(next) ||
+                    ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
+                    ChromaticAPI.isOutlineCode(next) ||
+                    next == '[';
+
+            // 1. Always intercept CUSTOM codes, whether they use § or &
+            if ((c == '§' || c == '&') && isCustomCode) {
+                return true;
+            }
+
+            // 2. Intercept VANILLA codes ONLY if they use the & symbol.
+            // We ignore vanilla codes using § so we don't break lang files!
+            if (c == '&' && net.minecraft.ChatFormatting.getByCode(next) != null) {
+                return true;
             }
         }
         return false;
@@ -80,6 +87,7 @@ public abstract class MixinLiteralContents {
                     if (closeIdx != -1) {
                         String name = s.substring(i + 2, closeIdx);
                         if (ChromaticAPI.isNamedRegistered(name) ||
+                                ChromaticAPI.isNamedOutlineCode(name) ||
                                 ChromaticColors.NAMED_CUSTOM_FORMATTING
                                         .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
                             sb.append('§').append(s, i + 1, closeIdx + 1);
@@ -89,7 +97,10 @@ public abstract class MixinLiteralContents {
                     }
                 } else if (ChromaticAPI.isRegistered(lower) ||
                         ChromaticColors.CUSTOM_FORMATTING.containsKey(lower) ||
-                        ChatFormatting.getByCode(lower) != null) {
+                        ChromaticAPI.isOutlineCode(lower) ||
+                        net.minecraft.ChatFormatting.getByCode(lower) != null) {
+
+                            // Replace &X → §X for chromatic, custom, outline, AND vanilla codes.
                             sb.append('§').append(next);
                             i++;
                             continue;

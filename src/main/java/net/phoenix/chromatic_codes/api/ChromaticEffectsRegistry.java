@@ -4,7 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
@@ -20,6 +20,14 @@ public class ChromaticEffectsRegistry {
         parseAndRegister(ModConfig.INSTANCE.colors.customGradients);
         parseAndRegisterNamed(ModConfig.INSTANCE.colors.namedGradients);
     }
+
+    // -------------------------------------------------------------------------
+    // Formatting registration
+    // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
+    // Color/effect registration (unchanged from original)
+    // -------------------------------------------------------------------------
 
     public static void parseAndRegister(String[] configEntries) {
         if (configEntries == null || configEntries.length == 0) {
@@ -38,15 +46,23 @@ public class ChromaticEffectsRegistry {
                 String movementId = parts[3].toLowerCase();
                 List<Integer> colors = resolveColors(parts[4].toLowerCase());
 
+                // 'outline' was previously a movementId here; it is now a formatting
+                // modifier in the [formatting] section. Skip silently with a warning
+                // so old configs don't crash.
+                if (movementId.equals("outline")) {
+                    PhoenixChromaticCodes.LOGGER.warn(
+                            "Phoenix Chromatic: Entry '{}' uses movementId 'outline', which has moved " +
+                                    "to the [formatting] section of the config. This entry has been ignored.",
+                            entry);
+                    continue;
+                }
+
                 IChromaticEffect effect = MovementRegistry.create(movementId, colorSpeed, moveSpeed, colors);
 
-                // Use the character's decimal codepoint as the font path so the
-                // ResourceLocation is always valid regardless of what character
-                // the user picks — e.g. '^' (94) → phoenix_chromatic_codes:code_94
                 ResourceLocation fontId = PhoenixChromaticCodes.id("code_" + (int) Character.toLowerCase(code));
 
-                PhoenixChromaticCodes.LOGGER.info("Phoenix Chromatic: Registering §{} with effect {} on font {}", code,
-                        movementId, fontId);
+                PhoenixChromaticCodes.LOGGER.info(
+                        "Phoenix Chromatic: Registering §{} with effect {} on font {}", code, movementId, fontId);
 
                 ChromaticAPI.registerEffect(code, fontId, effect);
             } catch (Exception e) {
@@ -60,13 +76,11 @@ public class ChromaticEffectsRegistry {
 
         for (String entry : configEntries) {
             try {
-                // Format: "[name]:colorSpeed:moveSpeed:movementId:colors"
                 if (!entry.startsWith("[")) continue;
                 int bracket = entry.indexOf(']');
                 if (bracket < 2) continue;
 
-                String name = entry.substring(1, bracket); // case-sensitive — no toLowerCase
-                // skip "]:"
+                String name = entry.substring(1, bracket);
                 if (bracket + 2 > entry.length()) continue;
                 String rest = entry.substring(bracket + 2);
 
@@ -78,11 +92,17 @@ public class ChromaticEffectsRegistry {
                 String movementId = parts[2].toLowerCase();
                 List<Integer> colors = resolveColors(parts[3].toLowerCase());
 
+                // Same guard as above for named entries using the old outline movementId
+                if (movementId.equals("outline")) {
+                    PhoenixChromaticCodes.LOGGER.warn(
+                            "Phoenix Chromatic: Named entry '{}' uses movementId 'outline', which has moved " +
+                                    "to the [formatting] section. This entry has been ignored.",
+                            entry);
+                    continue;
+                }
+
                 IChromaticEffect effect = MovementRegistry.create(movementId, colorSpeed, moveSpeed, colors);
 
-                // Font path uses the name: phoenix_chromatic_codes:named_phoenix
-                // Font path: use hashCode of the raw name so case variants get unique paths
-                // (ResourceLocation paths must be lowercase a-z0-9/_.- so we cannot embed the name directly)
                 String fontPath = "named_" + Math.abs(name.hashCode());
                 ResourceLocation fontId = PhoenixChromaticCodes.id(fontPath);
 
@@ -109,7 +129,6 @@ public class ChromaticEffectsRegistry {
 
     /**
      * Parses a string containing §[name] and §c style codes into a Component tree.
-     * Uses an index-walk so §[name] (multi-char) is handled correctly.
      */
     public static Component parseCustomEffects(String text) {
         MutableComponent root = Component.literal("");
@@ -121,7 +140,6 @@ public class ChromaticEffectsRegistry {
             char c = text.charAt(i);
 
             if (c == '§' && i + 1 < len) {
-                // Flush any accumulated plain text first
                 if (plain.length() > 0) {
                     root.append(Component.literal(plain.toString()));
                     plain.setLength(0);
@@ -133,10 +151,9 @@ public class ChromaticEffectsRegistry {
                 if (next == '[') {
                     int closeIdx = text.indexOf(']', i + 2);
                     if (closeIdx != -1) {
-                        String name = text.substring(i + 2, closeIdx); // case-sensitive
+                        String name = text.substring(i + 2, closeIdx);
                         i = closeIdx + 1;
 
-                        // Collect content until the next § or end of string
                         int contentEnd = text.indexOf('§', i);
                         String content = contentEnd == -1 ? text.substring(i) : text.substring(i, contentEnd);
                         i = contentEnd == -1 ? len : contentEnd;
@@ -151,7 +168,6 @@ public class ChromaticEffectsRegistry {
                                             .get(ChromaticAPI.normalizeNamedKey(name));
                                     seg = seg.withStyle(s -> s.withColor(hex));
                                 } else {
-                                    // Unknown named code — emit literally
                                     root.append(Component.literal("§[" + name + "]" + content));
                                     continue;
                                 }
@@ -160,7 +176,7 @@ public class ChromaticEffectsRegistry {
                     }
                 }
 
-                // Single-char code: §cContent
+                // Single-char code
                 char code = next;
                 i += 2;
 

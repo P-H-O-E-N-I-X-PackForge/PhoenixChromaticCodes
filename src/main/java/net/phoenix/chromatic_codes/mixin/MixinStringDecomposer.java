@@ -6,7 +6,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.StringDecomposer;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,23 +22,8 @@ public class MixinStringDecomposer {
             cancellable = true)
     private static void phoenix$injectCustomStyles(String text, int skip, Style currentStyle, Style defaultStyle,
                                                    FormattedCharSink sink, CallbackInfoReturnable<Boolean> cir) {
+        // Fast-fail if there are no formatting symbols whatsoever
         if (text.indexOf('\u00a7') == -1) return;
-
-        // Only take over if there's actually a custom code in this string.
-        // Pure-vanilla strings are left entirely to vanilla's own loop.
-        boolean hasCustomCode = false;
-        for (int i = 0; i < text.length() - 1; i++) {
-            if (text.charAt(i) == '\u00a7') {
-                char next = Character.toLowerCase(text.charAt(i + 1));
-                if (ChromaticAPI.getFontForCode(next) != null ||
-                        ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
-                        next == '[') { // bracket codes always need our loop
-                    hasCustomCode = true;
-                    break;
-                }
-            }
-        }
-        if (!hasCustomCode) return;
 
         // Reset LAST_CODE at the start of every decomposition so stale state
         // from a previous render never bleeds into unrelated text.

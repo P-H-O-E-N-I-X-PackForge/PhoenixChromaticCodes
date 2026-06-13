@@ -3,7 +3,7 @@ package net.phoenix.chromatic_codes.api;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.phoenix.ChromaticAPI;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
 import org.apache.logging.log4j.LogManager;

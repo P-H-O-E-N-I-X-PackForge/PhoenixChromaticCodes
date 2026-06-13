@@ -21,6 +21,11 @@ public class DiscordGradientEffect implements IChromaticEffect {
     }
 
     @Override
+    public boolean useHorizontalBlending() {
+        return true;
+    }
+
+    @Override
     public boolean isStatic() {
         return true;
     }

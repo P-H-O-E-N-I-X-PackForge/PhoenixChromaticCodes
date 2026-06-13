@@ -8,14 +8,15 @@
   "minVersion": "0.8",
   "mixins": [
     "MixinChatFormatting",
+    "MixinFTBStringUtils",
+    "MixinFTBTextUtils",
     "MixinLiteralContents",
     "MixinStringDecomposer",
-    "MixinTextColor",
-    "MixinFTBStringUtils",
-    "MixinFTBTextUtils"
+    "MixinTextColor"
   ],
   "client": [
     "MixinBakedGlyph",
+    "MixinFontSet",
     "MixinStringRenderOutput"
   ],
   "injectors": {
