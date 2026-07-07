@@ -12,7 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(TextColor.class)
 public class MixinTextColor {
 
-    @Inject(method = "fromLegacyFormat", at = @At("HEAD"), cancellable = true)
+    // Force the compiler to skip mapping verification via remap = false
+    // and provide the explicit descriptor signature for fromLegacyFormat(ChatFormatting)
+    @Inject(
+            method = "fromLegacyFormat(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/TextColor;",
+            at = @At("HEAD"),
+            cancellable = true,
+            remap = false)
     private static void phoenix$applyCustomHex(ChatFormatting formatting, CallbackInfoReturnable<TextColor> cir) {
         char lastCode = ChromaticColors.LAST_CODE.get();
         Integer customColor = ChromaticColors.CUSTOM_FORMATTING.get(lastCode);

@@ -1,10 +1,18 @@
 package net.phoenix.chromatic_codes.api.effects;
 
+import net.phoenix.chromatic_codes.api.ColorHelper;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
 
 import java.util.List;
 
 public class VerticalGradientEffect implements IChromaticEffect {
+
+    // MixinBakedGlyph passes this.up/this.down (glyph-relative offsets from the
+    // baseline) as y here rather than an absolute screen coordinate, so a fixed
+    // glyph height assumption is used to normalize into a 0..1 range. These values
+    // match Minecraft's default font metrics (ascent + descent = ~9px).
+    private static final float GLYPH_ASCENT = 7.0f;
+    private static final float GLYPH_HEIGHT = 9.0f;
 
     private final int topColor;
     private final int bottomColor;
@@ -17,8 +25,9 @@ public class VerticalGradientEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-        // Return top color as a default fallback channel identifier
-        return this.topColor;
+        float factor = (y + GLYPH_ASCENT) / GLYPH_HEIGHT;
+        factor = Math.max(0.0f, Math.min(1.0f, factor));
+        return ColorHelper.lerp(this.topColor, this.bottomColor, factor);
     }
 
     // Direct explicit color interpolation helpers for top and bottom layout boundaries

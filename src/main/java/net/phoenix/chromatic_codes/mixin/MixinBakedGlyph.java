@@ -41,21 +41,23 @@ public abstract class MixinBakedGlyph {
     @Final
     private float v1;
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "render",
+            at = @At("HEAD"),
+            cancellable = true,
+            remap = false)
     private void phoenix$renderTrueGradient(boolean italic, float x, float y, Matrix4f matrix, VertexConsumer buffer,
                                             float red, float green, float blue, float alpha, int packedLight,
                                             CallbackInfo ci) {
         IChromaticEffect effect = ChromaticAPI.getCurrentEffect();
         if (effect == null) return;
 
-        // Vanilla multiplies all RGB channels by 0.25 for the shadow pass.
-        // Detect it and bail out so vanilla draws the shadow naturally —
-        // this prevents every glyph being drawn twice.
+
         if (red < 0.3f && green < 0.3f && blue < 0.3f) return;
 
         ci.cancel();
 
-        // 1. Transform Engine (Scaling)
+
         float scaleX = effect.getScaleX(x, y);
         float scaleY = effect.getScaleY(x, y);
         float uniformScale = effect.getScale(x, y);
@@ -71,10 +73,9 @@ public abstract class MixinBakedGlyph {
 
         float finalXL = centerX - (charHalfWidth * scaleX);
         float finalXR = centerX + (charHalfWidth * scaleX);
-        float finalYUp = centerY - (charHalfHeight * scaleY) - 3.0f;
-        float finalYDown = centerY + (charHalfHeight * scaleY) - 3.0f;
+        float finalYUp = centerY - (charHalfHeight * scaleY);
+        float finalYDown = centerY + (charHalfHeight * scaleY);
 
-        // 2. Localized X so gradients repeat consistently on short words
         float localizedX = x % 160.0f;
 
         int colorL = effect.getRenderColor(0, localizedX + this.left, y);
@@ -87,17 +88,27 @@ public abstract class MixinBakedGlyph {
         float gR = ((colorR >> 8) & 0xFF) / 255.0f;
         float bR = (colorR & 0xFF) / 255.0f;
 
-        // 3. Italics & Render
-        float italicTop = italic ? 1.0F - 0.25F * (this.up - 3.0f) : 0.0F;
-        float italicBottom = italic ? 1.0F - 0.25F * (this.down - 3.0f) : 0.0F;
+        float italicTop = italic ? 1.0F - 0.25F * this.up : 0.0F;
+        float italicBottom = italic ? 1.0F - 0.25F * this.down : 0.0F;
 
-        buffer.vertex(matrix, finalXL + italicTop, finalYUp, 0.0F).color(rL, gL, bL, alpha).uv(this.u0, this.v0)
-                .uv2(packedLight).endVertex();
-        buffer.vertex(matrix, finalXL + italicBottom, finalYDown, 0.0F).color(rL, gL, bL, alpha).uv(this.u0, this.v1)
-                .uv2(packedLight).endVertex();
-        buffer.vertex(matrix, finalXR + italicBottom, finalYDown, 0.0F).color(rR, gR, bR, alpha).uv(this.u1, this.v1)
-                .uv2(packedLight).endVertex();
-        buffer.vertex(matrix, finalXR + italicTop, finalYUp, 0.0F).color(rR, gR, bR, alpha).uv(this.u1, this.v0)
-                .uv2(packedLight).endVertex();
+        buffer.addVertex(matrix, finalXL + italicTop, finalYUp, 0.0F)
+                .setColor(rL, gL, bL, alpha)
+                .setUv(this.u0, this.v0)
+                .setLight(packedLight);
+
+        buffer.addVertex(matrix, finalXL + italicBottom, finalYDown, 0.0F)
+                .setColor(rL, gL, bL, alpha)
+                .setUv(this.u0, this.v1)
+                .setLight(packedLight);
+
+        buffer.addVertex(matrix, finalXR + italicBottom, finalYDown, 0.0F)
+                .setColor(rR, gR, bR, alpha)
+                .setUv(this.u1, this.v1)
+                .setLight(packedLight);
+
+        buffer.addVertex(matrix, finalXR + italicTop, finalYUp, 0.0F)
+                .setColor(rR, gR, bR, alpha)
+                .setUv(this.u1, this.v0)
+                .setLight(packedLight);
     }
 }

@@ -15,15 +15,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Set;
 
 /**
  * An in-memory PackResources that generates font definition JSONs at runtime
  * for every chromatic effect registered in ChromaticAPI.
- *
- * IMPORTANT: Pack.readMetaAndCreate calls getMetadataSection(PackMetadataSection.SERIALIZER)
- * to read pack format and description. We must return a real PackMetadataSection here,
- * NOT rely on getRootResource("pack.mcmeta") — that path is not used by readMetaAndCreate.
  */
 public class ChromaticDynamicPack implements PackResources {
 
@@ -32,38 +29,29 @@ public class ChromaticDynamicPack implements PackResources {
     private static final String PACK_ID = PhoenixChromaticCodes.MOD_ID + "_dynamic_fonts";
     private static final String NAMESPACE = PhoenixChromaticCodes.MOD_ID;
 
-    // pack_format 15 = Minecraft 1.20 / 1.20.1
+    // FIX: Updated pack_format to 34 (Minecraft 1.21.1 standard specification)
+    // and wrapped it with the new Optional bounding system configuration.
     private static final PackMetadataSection METADATA = new PackMetadataSection(
-            Component.literal("Phoenix Chromatic Codes dynamic fonts"), 15);
+            Component.literal("Phoenix Chromatic Codes dynamic fonts"),
+            34,
+            Optional.empty() // no explicit upper bounds capping necessary
+    );
 
-    // Font JSON: delegate all providers to minecraft:default.
-    // MixinStringRenderOutput applies the actual color/offset effects at render time.
     private static final byte[] FONT_JSON = "{\"providers\":[{\"type\":\"reference\",\"id\":\"minecraft:default\"}]}"
             .getBytes(StandardCharsets.UTF_8);
 
     private ChromaticDynamicPack() {}
 
-    /**
-     * getMetadataSection is what Pack.readMetaAndCreate actually calls.
-     * Return our PackMetadataSection when asked; null for anything else.
-     */
     @Override
     @Nullable
     @SuppressWarnings("unchecked")
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-        // "pack" is the section name PackMetadataSection uses — matches what
-        // Pack.readMetaAndCreate requests, without needing the SERIALIZER constant
-        // which was renamed between versions.
         if ("pack".equals(serializer.getMetadataSectionName())) {
             return (T) METADATA;
         }
         return null;
     }
 
-    /**
-     * getResource returns a nullable IoSupplier<InputStream> in 1.20.1.
-     * null = resource not found here.
-     */
     @Override
     @Nullable
     public IoSupplier<InputStream> getResource(PackType type, ResourceLocation location) {
@@ -71,7 +59,6 @@ public class ChromaticDynamicPack implements PackResources {
         if (!location.getNamespace().equals(NAMESPACE)) return null;
         if (!location.getPath().startsWith("font/")) return null;
 
-        // location.getPath() == "font/code_94.json" for code '^' (codepoint 94)
         for (ResourceLocation fontId : ChromaticAPI.getRegisteredFonts()) {
             if (!fontId.getNamespace().equals(NAMESPACE)) continue;
             if (location.getPath().equals("font/" + fontId.getPath() + ".json")) {
@@ -84,14 +71,9 @@ public class ChromaticDynamicPack implements PackResources {
     @Override
     @Nullable
     public IoSupplier<InputStream> getRootResource(String... elements) {
-        // Not used by Forge 1.20.1 pack loading — metadata is via getMetadataSection.
         return null;
     }
 
-    /**
-     * listResources is called during resource discovery.
-     * Emit one entry per registered font.
-     */
     @Override
     public void listResources(PackType type, String namespace, String path, ResourceOutput resourceOutput) {
         if (type != PackType.CLIENT_RESOURCES) return;
@@ -103,7 +85,8 @@ public class ChromaticDynamicPack implements PackResources {
             String resourcePath = "font/" + fontId.getPath() + ".json";
             if (!resourcePath.startsWith(path)) continue;
 
-            ResourceLocation loc = new ResourceLocation(NAMESPACE, resourcePath);
+            // FIX: Replaced old 'new ResourceLocation' syntax with 1.21 factory call
+            ResourceLocation loc = ResourceLocation.fromNamespaceAndPath(NAMESPACE, resourcePath);
             resourceOutput.accept(loc, () -> new ByteArrayInputStream(FONT_JSON));
         }
     }
@@ -117,6 +100,16 @@ public class ChromaticDynamicPack implements PackResources {
     @Override
     public String packId() {
         return PACK_ID;
+    }
+
+    // FIX: Implement the required location() contract for 1.21.1 PackResources
+    @Override
+    public net.minecraft.server.packs.PackLocationInfo location() {
+        return new net.minecraft.server.packs.PackLocationInfo(
+                this.packId(),
+                net.minecraft.network.chat.Component.literal("Chromatic Dynamic Fonts"),
+                net.minecraft.server.packs.repository.PackSource.BUILT_IN,
+                java.util.Optional.empty());
     }
 
     @Override

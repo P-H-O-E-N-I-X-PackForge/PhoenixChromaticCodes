@@ -1,86 +1,48 @@
-buildscript {
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
-}
-
 plugins {
-    id "idea"
-    id "eclipse"
-    id "maven-publish"
-    id 'net.neoforged.moddev.legacyforge' version '2.0.91'
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.141'
     id 'com.diffplug.spotless' version '7.0.2'
-}
-
-// NOTE: We do NOT apply the 'org.spongepowered.mixin' plugin here manually.
-// The NeoForged plugin handles the lifecycle, and we configure it via the mixin block at the bottom.
-
-sourceSets {
-    main.resources {
-        srcDir 'src/generated/resources'
-    }
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        name 'FirstDarkDev'
-        url "https://maven.firstdark.dev/snapshots/"
-    }
-    maven {
-        name = "BlameJared"
-        url = "https://maven.blamejared.com/"
-    }
-    maven {
-        url = "https://maven.tterrag.com/"
-        content {
-            includeGroup("com.tterrag.registrate")
-        }
-        maven {
-            name = "ftbMavenReleases"
-            url = uri("https://maven.ftb.dev/releases")
-        }
-        maven {
-            url = "https://maven.architectury.dev"
-        }
-    }
 }
 
 version = mod_version
 group = maven_group
 base { archivesName = archives_base_name }
-java { sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17 }
 
-legacyForge {
-    version = project.minecraft_version + '-' + project.forge_version
+// 1.21.1 requires Java 21
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+// Modern NeoForge Configuration block
+neoForge {
+    version = project.neoforge_version // Expected format e.g., 21.1.65
 
     parchment {
-        mappingsVersion = project.mapping_version
-        minecraftVersion = project.minecraft_version
+        mappingsVersion = project.parchment_mapping_version // e.g. 2024.07.28
+        minecraftVersion = project.parchment_minecraft_version // 1.21.1
     }
 
     runs {
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
-
-            // FIXED: Changed 'property' to 'systemProperty' to fix the Gradle evaluation crash
             systemProperty 'mixin.debug.export', 'true'
         }
         client {
             client()
-            sourceSet = sourceSets.main
-            systemProperty('forge.enabledGameTestNamespaces', project.mod_id)
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         server {
             server()
-            sourceSet = sourceSets.main
-            systemProperty('forge.enabledGameTestNamespaces', project.mod_id)
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
 
@@ -91,50 +53,65 @@ legacyForge {
     }
 }
 
-jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : mod_name,
-                "Specification-Vendor"    : mod_author,
-                "Specification-Version"   : "1",
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : mod_author,
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs"            : "${mod_id}.mixins.json"
-        ])
+sourceSets {
+    main.resources {
+        srcDir 'src/generated/resources'
     }
 }
 
-apply from: "$rootDir/gradle/scripts/spotless.gradle"
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+    maven {
+        name = 'FirstDarkDev'
+        url = "https://maven.firstdark.dev/snapshots/"
+    }
+    maven {
+        name = 'Configuration'
+        url = 'https://repo.repsy.io/mvn/toma/public/'
+    }
+    maven {
+        name = "BlameJared"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        url = "https://www.cursemaven.com"
+        content { includeGroup "curse.maven" }
+    }
+    maven {
+        url = "https://maven.tterrag.com/"
+        content { includeGroup "com.tterrag.registrate" }
+    }
+    maven {
+        name = "ftbMavenReleases"
+        url = "https://maven.ftb.dev/releases"
+    }
+    maven {
+        url = "https://maven.architectury.dev"
+    }
+}
 
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.1")
+    annotationProcessor "org.spongepowered:mixin:0.8.7:processor"
 
-    // The Annotation Processor is essential for generating the RefMap
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation("curse.maven:configuration-444699:6779573")
+    jarJar("curse.maven:configuration-444699:6779573")
 
-    modImplementation("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
+    compileOnly("dev.architectury:architectury-neoforge:${architectury_version}")
 
+    compileOnly("dev.ftb.mods:ftb-library-neoforge:${ftblibrary_version}")
+    compileOnly("dev.ftb.mods:ftb-teams-neoforge:${ftbteams_version}")
+    compileOnly("dev.ftb.mods:ftb-quests-neoforge:${ftbquests_version}")
 
-     jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
+    compileOnly("curse.maven:modern-ui-352491:6956345")
 
-    modCompileOnly("dev.architectury:architectury-forge:${architectury_version}")
-    modCompileOnly("dev.ftb.mods:ftb-library-forge:${ftblibrary_version}")
-    modCompileOnly("dev.ftb.mods:ftb-teams-forge:${ftbteams_version}")
-    modCompileOnly("dev.ftb.mods:ftb-quests-forge:${ftbquests_version}")
-
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-
-
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
-// This block tells the MixinGradle tool to generate the translation map for obfuscated environments
-mixin {
-    add sourceSets.main, "${mod_id}.refmap.json"
-    config "${mod_id}.mixins.json"
-}
+apply from: "$rootDir/gradle/scripts/spotless.gradle"
 
 tasks.named('processResources', ProcessResources).configure {
     var properties = [
@@ -144,9 +121,8 @@ tasks.named('processResources', ProcessResources).configure {
             "mod_name": mod_name,
             "mod_url": mod_url,
             "mod_author": mod_author,
-            "forge_version": forge_version.split("\\.")[0],
+            "neoforge_version": neoforge_version,
             "minecraft_version": minecraft_version,
-            "configuration_version": configuration_version,
             "architectury_version": architectury_version,
             "ftblibrary_version": ftblibrary_version,
             "ftbteams_version": ftbteams_version,
@@ -154,15 +130,15 @@ tasks.named('processResources', ProcessResources).configure {
     ]
     inputs.properties(properties)
 
-    filesMatching("META-INF/mods.toml") {
+    filesMatching("META-INF/neoforge.mods.toml") {
         expand properties + [project: project]
     }
 }
 
-tasks.named('jar', Jar).configure { finalizedBy 'reobfJar' }
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
-    options.release.set(17)
+    options.release.set(21) // Target Java 21 compiled bytecode
     options.compilerArgs << "-Aquiet=true"
+
+
 }

@@ -1,11 +1,9 @@
 package net.phoenix.chromatic_codes;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.phoenix.chromatic_codes.api.*;
 import net.phoenix.chromatic_codes.api.effects.*;
 import net.phoenix.chromatic_codes.config.ModConfig;
@@ -19,9 +17,7 @@ public class PhoenixChromaticCodes {
     public static final String MOD_ID = "phoenix_chromatic_codes";
     public static final Logger LOGGER = LogManager.getLogger();
 
-    public PhoenixChromaticCodes(FMLJavaModLoadingContext context) {
-        IEventBus modEventBus = context.getModEventBus();
-
+    public PhoenixChromaticCodes(IEventBus modEventBus) {
         ModConfig.init();
 
         MovementRegistry.register("wave", (cs, ms, colors) -> new DynamicEffect(colors, cs, ms, "wave"));
@@ -32,10 +28,8 @@ public class PhoenixChromaticCodes {
         MovementRegistry.register("glitch", GlitchEffect::new);
         MovementRegistry.register("breath", BreathEffect::new);
         MovementRegistry.register("stretch", StretchEffect::new);
-        MovementRegistry.register("mirror", (cs, ms, colors) -> new MirroredGradientEffect(colors));      // Symmetric
-                                                                                                          // Gloss
-        MovementRegistry.register("vertical", (cs, ms, colors) -> new VerticalGradientEffect(colors));  // Top-to-Bottom
-                                                                                                        // Split
+        MovementRegistry.register("mirror", (cs, ms, colors) -> new MirroredGradientEffect(colors));
+        MovementRegistry.register("vertical", (cs, ms, colors) -> new VerticalGradientEffect(colors));
 
         // --- New God-Tier Cosmetic Code Registrations ---
         MovementRegistry.register("rainbow_wave", (cs, ms, colors) -> new RainbowWaveEffect(cs, ms));
@@ -60,20 +54,20 @@ public class PhoenixChromaticCodes {
         MovementRegistry.register("3d_spin", (cs, ms, colors) -> new MatrixSpinEffect(ms));
         MovementRegistry.register("liquid_plasma", (cs, ms, colors) -> new LiquidPlasmaEffect(cs));
 
-        // 2. SECOND: Now init the registry so it can find the types above
+        // Init the registry so it can parse types
         ChromaticEffectsRegistry.init();
-
         ChromaticColors.init();
 
         modEventBus.addListener(this::commonSetup);
-        MinecraftForge.EVENT_BUS.register(this);
+
+        // FIX: Removed the empty NeoForge.EVENT_BUS.register(this) call that caused the crash.
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Phoenix's Chromatic Codes is heating up!");
+        LOGGER.info("Phoenix's Chromatic Codes is heating up on NeoForge!");
     }
 
     public static ResourceLocation id(String path) {
-        return new ResourceLocation(MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 }

@@ -2,7 +2,7 @@ package net.phoenix.chromatic_codes.mixin;
 
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.util.StringDecomposer;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
@@ -15,15 +15,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 
-@Mixin(LiteralContents.class)
+@Mixin(PlainTextContents.LiteralContents.class)
 public abstract class MixinLiteralContents {
 
-    @Inject(method = "visit(Lnet/minecraft/network/chat/FormattedText$StyledContentConsumer;Lnet/minecraft/network/chat/Style;)Ljava/util/Optional;",
+    // Force the compiler to skip mapping verification via remap = false
+    // and provide the exact bytecode method descriptor path for safety.
+    @Inject(
+            method = "visit(Lnet/minecraft/network/chat/FormattedText$StyledContentConsumer;Lnet/minecraft/network/chat/Style;)Ljava/util/Optional;",
             at = @At("HEAD"),
-            cancellable = true)
+            cancellable = true,
+            remap = false)
     private <T> void phoenix$decomposeLiteral(FormattedText.StyledContentConsumer<T> consumer, Style style,
                                               CallbackInfoReturnable<Optional<T>> cir) {
-        String rawText = ((LiteralContents) (Object) this).text();
+        // The decompile verifies the record property getter method name is exactly .text()
+        String rawText = ((PlainTextContents.LiteralContents) (Object) this).text();
 
         if (!phoenix$containsActionableCode(rawText)) return;
 
@@ -56,13 +61,10 @@ public abstract class MixinLiteralContents {
                     ChromaticAPI.isOutlineCode(next) ||
                     next == '[';
 
-            // 1. Always intercept CUSTOM codes, whether they use § or &
             if ((c == '§' || c == '&') && isCustomCode) {
                 return true;
             }
 
-            // 2. Intercept VANILLA codes ONLY if they use the & symbol.
-            // We ignore vanilla codes using § so we don't break lang files!
             if (c == '&' && net.minecraft.ChatFormatting.getByCode(next) != null) {
                 return true;
             }
@@ -81,7 +83,6 @@ public abstract class MixinLiteralContents {
                 char next = s.charAt(i + 1);
                 char lower = Character.toLowerCase(next);
 
-                // Named bracket code: &[name] → §[name]
                 if (lower == '[') {
                     int closeIdx = s.indexOf(']', i + 2);
                     if (closeIdx != -1) {
@@ -100,7 +101,6 @@ public abstract class MixinLiteralContents {
                         ChromaticAPI.isOutlineCode(lower) ||
                         net.minecraft.ChatFormatting.getByCode(lower) != null) {
 
-                            // Replace &X → §X for chromatic, custom, outline, AND vanilla codes.
                             sb.append('§').append(next);
                             i++;
                             continue;

@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "net.phoenix.chromatic_codes.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "refmap": "phoenix_chromatic_codes.refmap.json",
   "plugin": "net.phoenix.chromatic_codes.mixin.FTBCompatibilityPlugin",
   "priority": 2000,
@@ -12,7 +12,10 @@
     "MixinFTBTextUtils",
     "MixinLiteralContents",
     "MixinStringDecomposer",
-    "MixinTextColor"
+    "MixinTextColor",
+    "MixinTextLayout",
+    "MixinTextLayoutDraw",
+    "MixinTextLayoutProcessor"
   ],
   "client": [
     "MixinBakedGlyph",

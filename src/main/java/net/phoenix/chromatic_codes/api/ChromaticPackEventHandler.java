@@ -1,29 +1,21 @@
 package net.phoenix.chromatic_codes.api;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
-import net.minecraftforge.event.AddPackFindersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 
 /**
  * Listens on the MOD event bus for AddPackFindersEvent and injects
  * ChromaticDynamicPack so Minecraft discovers our generated font JSONs
  * without any manual file creation.
- *
- * Register this class in your mod constructor or via @Mod.EventBusSubscriber:
- *
- * MinecraftForge.EVENT_BUS <-- wrong, this is the FORGE bus
- * FMLJavaModLoadingContext.get().getModEventBus() <-- correct, this is the MOD bus
- *
- * The easiest way is the @Mod.EventBusSubscriber annotation below.
- * Make sure ChromaticEffectsRegistry.init() is called BEFORE this fires
- * (i.e. in FMLClientSetupEvent or FMLCommonSetupEvent, which both fire earlier).
  */
-@Mod.EventBusSubscriber(modid = PhoenixChromaticCodes.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = PhoenixChromaticCodes.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ChromaticPackEventHandler {
 
     @SubscribeEvent
@@ -31,17 +23,39 @@ public class ChromaticPackEventHandler {
         // We only care about client resource packs (assets), not server datapacks
         if (event.getPackType() != PackType.CLIENT_RESOURCES) return;
 
-        // Pack.readMetaAndCreate reads our pack.mcmeta via getRootResource,
-        // then creates a Pack entry pointing at ChromaticDynamicPack.INSTANCE.
-        Pack pack = Pack.readMetaAndCreate(
+        // 1. Create the unified location info envelope containing ID, name, and source metadata
+        net.minecraft.server.packs.PackLocationInfo locationInfo = new net.minecraft.server.packs.PackLocationInfo(
                 ChromaticDynamicPack.INSTANCE.packId(),          // unique id string
                 Component.literal("Chromatic Dynamic Fonts"),    // display name
-                true,                                            // required = always active
-                (id) -> ChromaticDynamicPack.INSTANCE,           // ResourcesSupplier
-                PackType.CLIENT_RESOURCES,
-                Pack.Position.TOP,                               // load on top so we aren't overridden
-                PackSource.BUILT_IN                              // shows as built-in in the UI
+                PackSource.BUILT_IN,                             // pack source metadata
+                java.util.Optional.empty()                       // knownPackInfo (empty for dynamic packs)
         );
+
+        // 2. Define the selection rules (always active on top)
+        PackSelectionConfig selectionConfig = new PackSelectionConfig(
+                true,                 // required = always active/forced
+                Pack.Position.TOP,    // load on top so we aren't overridden
+                false                 // fixed position (cannot be dragged down)
+        );
+
+        // 3. Modern 4-argument call signature with the exact 1.21.1 method mappings
+        Pack pack = Pack.readMetaAndCreate(
+                locationInfo,
+                new Pack.ResourcesSupplier() {
+
+                    @Override
+                    public net.minecraft.server.packs.PackResources openPrimary(net.minecraft.server.packs.PackLocationInfo info) {
+                        return ChromaticDynamicPack.INSTANCE;
+                    }
+
+                    @Override
+                    public net.minecraft.server.packs.PackResources openFull(net.minecraft.server.packs.PackLocationInfo info,
+                                                                             Pack.Metadata metadata) {
+                        return ChromaticDynamicPack.INSTANCE;
+                    }
+                },
+                PackType.CLIENT_RESOURCES,
+                selectionConfig);
 
         if (pack != null) {
             event.addRepositorySource(consumer -> consumer.accept(pack));

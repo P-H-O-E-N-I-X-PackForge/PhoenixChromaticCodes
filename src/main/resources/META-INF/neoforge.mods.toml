@@ -1,70 +1,71 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
+loaderVersion = "[4,)" # Specifies NeoForge 4.x+ for 1.21+
 license = "${mod_license}"
 
-# This is a URL to e.g. your GitHub or CurseForge issues page.
-# It will appear in any crash reports this mod is directly involved in.
-# issueTrackerURL="https://github.com/invalid/pleasechangeme/issues" #optional
-# A list of mods - how many allowed here is determined by the individual mod loader
+[modproperties.phoenix_chromatic_codes]
+mixinExtrasVersion = "0.4.1"
 
 [[mods]]
 modId = "phoenix_chromatic_codes"
 version = "1.10"
 displayName = "PhoenixChromaticCodes"
 displayURL = "${mod_url}"
-# This will be displayed as your mod's logo in the Mods panel.
-# logoFile="icon.png" #optional
-# Some more fluff displayed in the Mods panel. Feel free to issue your special thanks here!
-# credits="Thanks to Mojang for making this great game" #optional
-# Some more fluff displayed in the Mods panel. Plug your stuff here!
-authors="${mod_author}"
+authors = "${mod_author}"
 description = '''A mod focused on adding custom color codes and effects.'''
+# --- MIXIN CONFIGURATIONS ---
+
+[[mixins]]
+config = "phoenix_chromatic_codes.mixins.json"
+
+# --- REQUIRED DEPENDENCIES ---
 
 [[dependencies.phoenix_chromatic_codes]]
-modId = "forge"
-mandatory = true
-versionRange = "[${forge_version},)"
+modId = "neoforge"
+type = "required" # Replaced mandatory = true
+versionRange = "[21.1,)" # Targets NeoForge 1.21.1+
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.phoenix_chromatic_codes]]
 modId = "minecraft"
-mandatory = true
-versionRange = "[${minecraft_version},)"
+type = "required"
+versionRange = "[1.21.1]" # Explicitly locks to 1.21.1 runtime boundary
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.phoenix_chromatic_codes]]
 modId = "configuration"
-mandatory = true
-versionRange = "[${configuration_version},)"
+type = "required"
+versionRange = "[3.0,)"
 ordering = "NONE"
 side = "BOTH"
 
+# --- OPTIONAL DEPENDENCIES ---
+
 [[dependencies.phoenix_chromatic_codes]]
 modId = "architectury"
-mandatory = false
+type = "optional" # Replaced mandatory = false
 versionRange = "[${architectury_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.phoenix_chromatic_codes]]
 modId = "ftblibrary"
-mandatory = false
+type = "optional"
 versionRange = "[${ftblibrary_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.phoenix_chromatic_codes]]
 modId = "ftbteams"
-mandatory = false
+type = "optional"
 versionRange = "[${ftbteams_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.phoenix_chromatic_codes]]
 modId = "ftbquests"
-mandatory = false
+type = "optional"
 versionRange = "[${ftbquests_version},)"
 ordering = "NONE"
 side = "BOTH"
