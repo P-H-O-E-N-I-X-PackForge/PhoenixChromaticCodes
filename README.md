@@ -1,15 +1,14 @@
 # Phoenix's Chromatic Codes
-### *A high-performance Forge (1.20.1) Rendering Framework*
-
-**Phoenix's Chromatic Codes** is a specialized rendering framework designed to bypass the hardcoded limitations of the Minecraft engine. By utilizing `BakedGlyph` Mixins, it introduces a robust, per-character formatting system that supports dynamic gradients, animations, and true hex-color depth.
+### A mod meant to provide cool effects and colors through legacy formatting. This is to allow cool text through systems that primarily only work with lang entries.
 
 ---
 
 ## Advanced Formatting Engine
-Unlike standard Minecraft formatting, Phoenix's Chromatic Codes allows for deep customization via the configuration. You can define custom character triggers for both static colors and complex animated effects.
+With PhCC you can make all your text incredibly pretty. You can define custom character/named triggers for both new hex code colors and complex animated effects.
 
 ### Where to use Chromatic Codes?
-You can use these codes **anywhere standard Minecraft formatting (`&` or `§`) is supported.** This includes:
+You can use these codes **anywhere standard Minecraft formatting (`&` or `§`) is supported.** 
+This includes:
 * **Chat:** Direct messages and global chat.
 * **Item Lore:** Machine names, tooltips, and item descriptions.
 * **GUIs:** GregTech machine interfaces and custom menus.
@@ -50,6 +49,7 @@ customGradients:
   - "^:0.0:0.0:discord:BF00FF,FFB7C5" # Purple-to-Pink scroll
   - "g:1.0:3.0:glitch:00FF00,005500" # Matrix-style digital decay
   - "%:0.0:2.0:stretch:FF00FF"       # Magenta horizontal stretching
+```
 
 ##  Extending the API: Adding New Effects
 Phoenix's Chromatic Codes uses a **Movement Registry**, allowing you to register custom animation logic without modifying core Mixins.
@@ -73,6 +73,7 @@ public class MyCustomEffect implements IChromaticEffect {
         return colors.get(0); 
     }
 }
+```
 
 ### 2. Register the Movement ID
 Register the factory in your mod constructor so it is available to the configuration parser:
@@ -81,8 +82,10 @@ Register the factory in your mod constructor so it is available to the configura
 MovementRegistry.register("my_effect_id", (colorSpeed, moveSpeed, colors) -> 
     new MyCustomEffect(colorSpeed, moveSpeed, colors)
 );
+```
+
 ### Thread Safety
-The engine uses `ThreadLocal<IChromaticEffect>` to bridge the gap between the high-level Font system and the low-level GL draw calls safely. This prevents race conditions and data "bleeding" between different text components during frame rendering.
+The engine uses `ThreadLocal<IChromaticEffect>` to bridge the gap between the font system and the graphic draw calls safely. This prevents race conditions and data bleeding between different text components during frame rendering.
 
 ```java
 private static final ThreadLocal<IChromaticEffect> CURRENT_EFFECT = new ThreadLocal<>();
@@ -94,3 +97,4 @@ public static void setCurrentEffect(IChromaticEffect effect) {
 public static IChromaticEffect getCurrentEffect() {
     return CURRENT_EFFECT.get();
 }
+```
