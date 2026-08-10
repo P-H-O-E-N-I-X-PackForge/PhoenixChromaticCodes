@@ -22,6 +22,28 @@ public class ModConfig {
     @Configurable
     public ColorConfig colors = new ColorConfig();
 
+    @Configurable
+    public CompatibilityConfig compatibility = new CompatibilityConfig();
+
+    // =========================================================================
+    // COMPATIBILITY CONFIG
+    // =========================================================================
+
+    public static class CompatibilityConfig {
+
+        @Configurable
+        @Configurable.Comment({
+                "Disable Chromatic Codes parsing while a GuideME guidebook screen is open.",
+                "GuideME pages are plain descriptive text, so an '&' immediately followed by",
+                "a registered code letter (e.g. an ingredient list reading '... & Steel' when",
+                "'s' is a registered code) would otherwise be misread as a chromatic code and",
+                "break the guide's formatting. Chromatic codes keep working everywhere else",
+                "(chat, tooltips, signs, books, other GUIs).",
+                "Default: true"
+        })
+        public boolean disableInGuideME = true;
+    }
+
     // =========================================================================
     // COLOR CONFIG
     // =========================================================================

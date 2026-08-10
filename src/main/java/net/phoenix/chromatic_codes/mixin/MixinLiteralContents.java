@@ -6,6 +6,7 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.util.StringDecomposer;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
+import net.phoenix.chromatic_codes.compat.GuideMeCompat;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,6 +24,8 @@ public abstract class MixinLiteralContents {
             cancellable = true)
     private <T> void phoenix$decomposeLiteral(FormattedText.StyledContentConsumer<T> consumer, Style style,
                                               CallbackInfoReturnable<Optional<T>> cir) {
+        if (GuideMeCompat.shouldSkip()) return;
+
         String rawText = ((LiteralContents) (Object) this).text();
 
         if (!phoenix$containsActionableCode(rawText)) return;
