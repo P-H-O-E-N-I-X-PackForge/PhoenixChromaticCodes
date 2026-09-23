@@ -8,7 +8,7 @@ import java.util.List;
 public class WordFadeEffect implements IChromaticEffect {
 
     private final List<Integer> colors;
-    private final float maxSpan = 120.0f; 
+    private final float maxSpan = 120.0f;
 
     public WordFadeEffect(List<Integer> colors) {
         this.colors = colors;

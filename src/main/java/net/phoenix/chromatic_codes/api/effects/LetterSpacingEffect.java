@@ -7,18 +7,17 @@ public class LetterSpacingEffect implements IChromaticEffect {
     private final float spacingCushion;
 
     public LetterSpacingEffect(float spacingCushion) {
-        
         this.spacingCushion = spacingCushion;
     }
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-        return 0xFFFFFF; 
+        return 0xFFFFFF;
     }
 
     @Override
     public float getScale(float x, float y) {
-        return 1.0f; 
+        return 1.0f;
     }
 
     @Override

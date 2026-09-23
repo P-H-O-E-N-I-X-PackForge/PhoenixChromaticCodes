@@ -44,7 +44,7 @@ public abstract class MixinStringRenderOutput {
         if (font.getNamespace().equals("phoenix_chromatic_codes")) {
             IChromaticEffect effect = ChromaticAPI.getByFont(font);
             if (effect != null) {
-                ChromaticAPI.setCurrentEffect(effect); 
+                ChromaticAPI.setCurrentEffect(effect);
                 this.phoenix$currentOffsetX = effect.getXOffset(this.x, this.y);
                 this.phoenix$currentOffsetY = effect.getYOffset(this.x, this.y);
                 this.x += this.phoenix$currentOffsetX;
@@ -52,7 +52,7 @@ public abstract class MixinStringRenderOutput {
                 return;
             }
         }
-        
+
         ChromaticAPI.setCurrentEffect(null);
         this.phoenix$currentOffsetX = 0;
         this.phoenix$currentOffsetY = 0;

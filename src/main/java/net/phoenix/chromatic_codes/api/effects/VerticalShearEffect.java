@@ -8,7 +8,6 @@ public class VerticalShearEffect implements IChromaticEffect {
     private final float shearSlope;
 
     public VerticalShearEffect(float shearSlope) {
-        
         this.shearSlope = shearSlope != 0.0f ? shearSlope : -0.2f;
     }
 
@@ -19,7 +18,6 @@ public class VerticalShearEffect implements IChromaticEffect {
 
     @Override
     public float getYOffset(float x, float y) {
-        
         float localX = x - ChromaticAPI.getSegmentStartX();
         return localX * this.shearSlope;
     }

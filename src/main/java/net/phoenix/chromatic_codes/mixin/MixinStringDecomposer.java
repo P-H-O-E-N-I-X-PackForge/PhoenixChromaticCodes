@@ -22,7 +22,6 @@ public class MixinStringDecomposer {
             cancellable = true)
     private static void phoenix$injectCustomStyles(String text, int skip, Style currentStyle, Style defaultStyle,
                                                    FormattedCharSink sink, CallbackInfoReturnable<Boolean> cir) {
-        
         if (text.indexOf('\u00a7') == -1) return;
 
         ChromaticColors.LAST_CODE.set(' ');
@@ -53,7 +52,7 @@ public class MixinStringDecomposer {
                         ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
                         if (namedFont != null) {
                             style = style.withFont(namedFont).withColor((TextColor) null);
-                            j = closeIdx; 
+                            j = closeIdx;
                             continue;
                         }
 
@@ -63,7 +62,7 @@ public class MixinStringDecomposer {
                             j = closeIdx;
                             continue;
                         }
-                        
+
                     }
                 }
 

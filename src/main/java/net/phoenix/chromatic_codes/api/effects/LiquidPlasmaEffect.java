@@ -22,7 +22,7 @@ public class LiquidPlasmaEffect implements IChromaticEffect {
                 Math.sin((localX + y) * 0.02 + time);
 
         float hue = (float) ((plasmaValue / 6.0) + 0.5) % 1.0f;
-        
+
         return Color.HSBtoRGB(hue, 0.9f, 1.0f);
     }
 

@@ -19,9 +19,9 @@ public class MatrixSpinEffect implements IChromaticEffect {
         double cos = Math.cos(getAngle());
 
         if (cos >= 0) {
-            return 0x00FF41; 
+            return 0x00FF41;
         } else {
-            return 0x003B0F; 
+            return 0x003B0F;
         }
     }
 
@@ -29,14 +29,14 @@ public class MatrixSpinEffect implements IChromaticEffect {
     public float getScaleX(float x, float y) {
         double cos = Math.cos(getAngle());
         float scale = (float) Math.abs(cos);
-        
+
         return Math.max(scale, 0.001f);
     }
 
     @Override
     public float getXOffset(float x, float y) {
         double cos = Math.cos(getAngle());
-        float halfWidth = 3.0f; 
+        float halfWidth = 3.0f;
 
         return (float) ((1.0 - Math.abs(cos)) * halfWidth * Math.signum(cos));
     }

@@ -10,14 +10,12 @@ public class VerticalGradientEffect implements IChromaticEffect {
     private final int bottomColor;
 
     public VerticalGradientEffect(List<Integer> colors) {
-        
         this.topColor = (colors != null && colors.size() > 0) ? colors.get(0) : 0xFFFFFF;
         this.bottomColor = (colors != null && colors.size() > 1) ? colors.get(1) : 0xAAAAAA;
     }
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-        
         return this.topColor;
     }
 

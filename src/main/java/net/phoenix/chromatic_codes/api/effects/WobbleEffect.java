@@ -17,7 +17,7 @@ public class WobbleEffect implements IChromaticEffect {
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
         if (colors == null || colors.isEmpty()) return 0xFFFFFF;
-        return colors.get(0); 
+        return colors.get(0);
     }
 
     @Override

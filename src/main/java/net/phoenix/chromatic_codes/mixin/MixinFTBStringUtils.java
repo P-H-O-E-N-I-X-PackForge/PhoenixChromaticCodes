@@ -21,7 +21,6 @@ public class MixinFTBStringUtils {
 
     @Inject(method = "<clinit>", at = @At("RETURN"), remap = false)
     private static void phoenix$expandFormattingPattern(CallbackInfo ci) {
-
         FORMATTING_CODE_PATTERN = Pattern.compile("(?i)[\\&\\u00a7]([^#$])");
     }
 }

@@ -16,7 +16,6 @@ public class MatrixRainEffect implements IChromaticEffect {
     }
 
     public float getVOffset() {
-        
         return (float) ((System.currentTimeMillis() * 0.001 * dropSpeed) % 1.0);
     }
 

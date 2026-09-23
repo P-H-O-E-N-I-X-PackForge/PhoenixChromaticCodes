@@ -67,12 +67,12 @@ public class ChromaticColors {
             if (dynamicFont != null) {
                 segment = segment.withStyle(s -> s.withFont(dynamicFont));
             }
-            
+
             else if (CUSTOM_FORMATTING.containsKey(code)) {
                 int color = CUSTOM_FORMATTING.get(code);
                 segment = segment.withStyle(s -> s.withColor(color));
             }
-            
+
             else {
                 root.append(Component.literal("§" + part));
                 continue;
@@ -83,7 +83,6 @@ public class ChromaticColors {
     }
 
     public static void init() {
-        
         String[] colorSettings = ModConfig.INSTANCE.colors.customColors;
         if (colorSettings != null) {
             for (String entry : colorSettings) {
@@ -112,13 +111,13 @@ public class ChromaticColors {
             for (String entry : namedColorSettings) {
                 if (entry == null || entry.isEmpty()) continue;
                 try {
-                    
+
                     if (!entry.startsWith("[")) continue;
                     int bracket = entry.indexOf(']');
                     if (bracket < 2) continue;
 
                     String name = entry.substring(1, bracket);
-                    
+
                     if (bracket + 2 > entry.length()) continue;
                     String hexPart = entry.substring(bracket + 2).replace("#", "").trim();
 

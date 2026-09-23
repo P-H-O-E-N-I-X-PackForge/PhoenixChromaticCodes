@@ -15,7 +15,6 @@ public class DiscordGradientEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int original, float x, float y) {
-
         return ColorHelper.getDiscordGradient(colors, x);
     }
 

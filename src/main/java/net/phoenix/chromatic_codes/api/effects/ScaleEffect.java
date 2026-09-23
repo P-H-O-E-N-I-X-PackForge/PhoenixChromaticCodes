@@ -12,13 +12,12 @@ public class ScaleEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int original, float x, float y) {
-        
         return 0xFFFFFF;
     }
 
     @Override
     public float getScale(float x, float y) {
-        return this.scale; 
+        return this.scale;
     }
 
     @Override
@@ -38,7 +37,6 @@ public class ScaleEffect implements IChromaticEffect {
 
     @Override
     public float getYOffset(float x, float y) {
-
         return 0;
     }
 }

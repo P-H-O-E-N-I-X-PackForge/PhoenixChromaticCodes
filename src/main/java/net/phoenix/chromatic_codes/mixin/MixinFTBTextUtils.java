@@ -86,13 +86,13 @@ public class MixinFTBTextUtils {
 
                 if (FTB_RESERVED.indexOf(next) != -1) {
                     if (phoenixChromaticCodes$isOurCode(lower)) {
-                        
+
                         CHROMATIC_LOGGER.warn(
                                 "Chromatic Codes: '&{}' is reserved by FTB Quests inside quest text and cannot " +
                                         "be used as a formatting code here. Use it in chat, books, or signs instead.",
                                 next);
                     }
-                    
+
                     sb.append(c).append(next);
                     i++;
                     continue;

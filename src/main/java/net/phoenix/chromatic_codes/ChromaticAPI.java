@@ -51,7 +51,7 @@ public class ChromaticAPI {
 
     public static boolean isDecoratorEffect(IChromaticEffect effect) {
         if (effect == null) return false;
-        
+
         for (ResourceLocation font : DECORATOR_FONTS) {
             if (FONT_TO_EFFECT.get(font) == effect) return true;
         }
@@ -88,7 +88,6 @@ public class ChromaticAPI {
     }
 
     public static boolean isNamedOutlineCode(String name) {
-        
         return NAMED_OUTLINE_CODES.contains(normalizeNamedKey(stripOutlineColor(name)));
     }
 
@@ -103,7 +102,7 @@ public class ChromaticAPI {
                 int color = (int) Long.parseLong(hexPart.replace("#", ""), 16);
                 return new int[] { color };
             } catch (NumberFormatException ignored) {
-                
+
             }
         }
         return new int[] { OUTLINE_COLOR_VALUE };
@@ -192,6 +191,6 @@ public class ChromaticAPI {
 
     public static String normalizeNamedKey(String name) {
         if (name == null) return "";
-        return name; 
+        return name;
     }
 }

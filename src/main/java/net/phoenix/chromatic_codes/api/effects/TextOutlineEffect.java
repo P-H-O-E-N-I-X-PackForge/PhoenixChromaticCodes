@@ -17,7 +17,7 @@ public class TextOutlineEffect implements IChromaticEffect {
     @Override
     public boolean isOutline() {
         return true;
-    } 
+    }
 
     @Override
     public int getOutlineColor() {

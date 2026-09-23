@@ -18,7 +18,7 @@ public class RainbowWaveEffect implements IChromaticEffect {
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
         long time = System.currentTimeMillis();
-        
+
         float localX = x - ChromaticAPI.getSegmentStartX();
         float hue = ((time * 0.002f * colorSpeed) + (localX * 0.01f)) % 1.0f;
         return Color.HSBtoRGB(hue, 0.85f, 1.0f);
@@ -27,7 +27,7 @@ public class RainbowWaveEffect implements IChromaticEffect {
     @Override
     public float getYOffset(float x, float y) {
         long time = System.currentTimeMillis() % 1000000L;
-        
+
         return (float) Math.sin((time / 150.0) * waveSpeed + (x * 0.1f)) * 2.0f;
     }
 

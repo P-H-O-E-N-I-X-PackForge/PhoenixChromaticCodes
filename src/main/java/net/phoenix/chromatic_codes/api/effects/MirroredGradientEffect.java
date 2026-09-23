@@ -9,7 +9,7 @@ import java.util.List;
 public class MirroredGradientEffect implements IChromaticEffect {
 
     private final List<Integer> colors;
-    private final float maxWidth = 100.0f; 
+    private final float maxWidth = 100.0f;
 
     public MirroredGradientEffect(List<Integer> colors) {
         this.colors = colors;
@@ -28,7 +28,7 @@ public class MirroredGradientEffect implements IChromaticEffect {
         if (factor > 0.5f) {
             factor = 1.0f - factor;
         }
-        factor *= 2.0f; 
+        factor *= 2.0f;
 
         return ColorHelper.getGradientColor(colors, 0.0f, factor * 100.0f);
     }

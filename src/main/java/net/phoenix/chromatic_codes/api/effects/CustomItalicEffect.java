@@ -7,7 +7,6 @@ public class CustomItalicEffect implements IChromaticEffect {
     private final float slantFactor;
 
     public CustomItalicEffect(float slantFactor) {
-
         this.slantFactor = slantFactor;
     }
 

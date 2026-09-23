@@ -14,7 +14,7 @@ public class MixinChatFormatting {
     @Inject(method = "getByCode", at = @At("HEAD"), cancellable = true)
     private static void phoenix$handleCustomCodes(char code, CallbackInfoReturnable<ChatFormatting> cir) {
         char lower = Character.toLowerCase(code);
-        
+
         if (ChromaticAPI.isRegistered(lower)) {
             cir.setReturnValue(ChatFormatting.WHITE);
         }

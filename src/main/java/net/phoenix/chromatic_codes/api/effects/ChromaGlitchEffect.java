@@ -16,18 +16,18 @@ public class ChromaGlitchEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-        if (colors == null || colors.isEmpty()) return 0xFF0055; 
-        long timeSeed = System.currentTimeMillis() / 150; 
+        if (colors == null || colors.isEmpty()) return 0xFF0055;
+        long timeSeed = System.currentTimeMillis() / 150;
         int index = (int) ((timeSeed + (int) x) % colors.size());
         return colors.get(Math.abs(index));
     }
 
     @Override
     public float getXOffset(float x, float y) {
-        long timeWindow = System.currentTimeMillis() / 200; 
-        
+        long timeWindow = System.currentTimeMillis() / 200;
+
         if ((timeWindow % 7 == 0 || timeWindow % 13 == 0) && rand.nextFloat() > 0.4f) {
-            return (rand.nextFloat() - 0.5f) * 3.5f; 
+            return (rand.nextFloat() - 0.5f) * 3.5f;
         }
         return 0;
     }

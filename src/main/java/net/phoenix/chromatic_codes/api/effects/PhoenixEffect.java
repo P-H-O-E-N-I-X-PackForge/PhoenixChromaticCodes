@@ -19,7 +19,7 @@ public class PhoenixEffect implements IChromaticEffect {
 
     @Override
     public boolean isAnimated() {
-        return true; 
+        return true;
     }
 
     @Override

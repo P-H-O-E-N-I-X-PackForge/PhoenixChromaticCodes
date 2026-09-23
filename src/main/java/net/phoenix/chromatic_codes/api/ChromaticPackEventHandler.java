@@ -14,18 +14,16 @@ public class ChromaticPackEventHandler {
 
     @SubscribeEvent
     public static void onAddPackFinders(AddPackFindersEvent event) {
-        
         if (event.getPackType() != PackType.CLIENT_RESOURCES) return;
 
         Pack pack = Pack.readMetaAndCreate(
-                ChromaticDynamicPack.INSTANCE.packId(),          
-                Component.literal("Chromatic Dynamic Fonts"),    
-                true,                                            
-                (id) -> ChromaticDynamicPack.INSTANCE,           
+                ChromaticDynamicPack.INSTANCE.packId(),
+                Component.literal("Chromatic Dynamic Fonts"),
+                true,
+                (id) -> ChromaticDynamicPack.INSTANCE,
                 PackType.CLIENT_RESOURCES,
-                Pack.Position.TOP,                               
-                PackSource.BUILT_IN                              
-        );
+                Pack.Position.TOP,
+                PackSource.BUILT_IN);
 
         if (pack != null) {
             event.addRepositorySource(consumer -> consumer.accept(pack));

@@ -29,7 +29,6 @@ public class PulseEffect implements IChromaticEffect {
 
     @Override
     public float getYOffset(float x, float y) {
-        
         double time = (System.currentTimeMillis() % 1000000L) / 1000.0;
         return (float) Math.sin(time * moveSpeed * 3.0) * 2.0f;
     }

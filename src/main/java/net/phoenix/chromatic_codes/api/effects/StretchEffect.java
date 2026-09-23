@@ -27,7 +27,7 @@ public class StretchEffect implements IChromaticEffect {
 
     @Override
     public float getScale(float x, float y) {
-        return 1.0f; 
+        return 1.0f;
     }
 
     @Override

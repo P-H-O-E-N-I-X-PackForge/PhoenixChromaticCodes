@@ -16,7 +16,6 @@ public class MovementRegistry {
     }
 
     public static IChromaticEffect create(String id, float colorSpeed, float moveSpeed, List<Integer> colors) {
-        
         MovementFactory factory = REGISTRY.get(id.toLowerCase());
 
         if (factory == null) {

@@ -23,7 +23,7 @@ public class GradientEffect implements IChromaticEffect {
         if (colors.length == 1) return colors[0];
 
         float time = (System.currentTimeMillis() / 1000f) * speed;
-        float offset = x * 0.01f; 
+        float offset = x * 0.01f;
         float progress = (time + offset) % 1.0f;
 
         float sectionProgress = progress * (colors.length - 1);

@@ -32,9 +32,9 @@ public class PhoenixChromaticCodes {
         MovementRegistry.register("glitch", GlitchEffect::new);
         MovementRegistry.register("breath", BreathEffect::new);
         MovementRegistry.register("stretch", StretchEffect::new);
-        MovementRegistry.register("mirror", (cs, ms, colors) -> new MirroredGradientEffect(colors));      
-                                                                                                          
-        MovementRegistry.register("vertical", (cs, ms, colors) -> new VerticalGradientEffect(colors));  
+        MovementRegistry.register("mirror", (cs, ms, colors) -> new MirroredGradientEffect(colors));
+
+        MovementRegistry.register("vertical", (cs, ms, colors) -> new VerticalGradientEffect(colors));
 
         MovementRegistry.register("rainbow_wave", (cs, ms, colors) -> new RainbowWaveEffect(cs, ms));
         MovementRegistry.register("outline", (cs, ms, colors) -> new TextOutlineEffect(colors));

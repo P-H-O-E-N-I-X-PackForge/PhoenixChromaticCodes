@@ -14,7 +14,6 @@ public class ChromaWaveEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-
         double wave = (x * 0.008) - (System.currentTimeMillis() * 0.0008 * this.colorSpeed);
 
         float hue = (float) (wave % 1.0);
@@ -50,7 +49,6 @@ public class ChromaWaveEffect implements IChromaticEffect {
 
     @Override
     public boolean useHorizontalBlending() {
-
         return true;
     }
 }

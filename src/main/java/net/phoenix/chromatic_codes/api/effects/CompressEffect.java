@@ -18,14 +18,14 @@ public class CompressEffect implements IChromaticEffect {
     @Override
     public float getScaleX(float x, float y) {
         double time = (System.currentTimeMillis() * 0.003) * pulseSpeed;
-        
+
         return 1.0f + (float) Math.sin(time) * 0.3f;
     }
 
     @Override
     public float getScaleY(float x, float y) {
         double time = (System.currentTimeMillis() * 0.003) * pulseSpeed;
-        
+
         return 1.0f - (float) Math.sin(time) * 0.2f;
     }
 

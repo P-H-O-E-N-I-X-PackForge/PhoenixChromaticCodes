@@ -36,7 +36,6 @@ public class ChromaticDynamicPack implements PackResources {
     @Nullable
     @SuppressWarnings("unchecked")
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-
         if ("pack".equals(serializer.getMetadataSectionName())) {
             return (T) METADATA;
         }
@@ -62,7 +61,6 @@ public class ChromaticDynamicPack implements PackResources {
     @Override
     @Nullable
     public IoSupplier<InputStream> getRootResource(String... elements) {
-        
         return null;
     }
 
@@ -94,7 +92,5 @@ public class ChromaticDynamicPack implements PackResources {
     }
 
     @Override
-    public void close() {
-        
-    }
+    public void close() {}
 }
