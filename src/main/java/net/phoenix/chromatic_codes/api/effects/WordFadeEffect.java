@@ -8,7 +8,7 @@ import java.util.List;
 public class WordFadeEffect implements IChromaticEffect {
 
     private final List<Integer> colors;
-    private final float maxSpan = 120.0f; // Bounding pixel width of the transparency sweep
+    private final float maxSpan = 120.0f; 
 
     public WordFadeEffect(List<Integer> colors) {
         this.colors = colors;
@@ -20,12 +20,10 @@ public class WordFadeEffect implements IChromaticEffect {
         return colors.get(0);
     }
 
-    // Custom helper getter that returns the alpha value (0.0 to 1.0) based on local position
     public float getDynamicAlpha(float x) {
         float localX = x - ChromaticAPI.getSegmentStartX();
         float progress = (localX < 0 ? 0 : localX) / maxSpan;
 
-        // Clamped linear decay curve (Fully visible at start, fades down to 15% opacity at end)
         float alphaFactor = 1.0f - progress;
         return Math.max(0.15f, Math.min(1.0f, alphaFactor));
     }

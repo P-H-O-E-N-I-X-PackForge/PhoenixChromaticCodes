@@ -124,6 +124,11 @@ dependencies {
     modCompileOnly("dev.ftb.mods:ftb-teams-forge:${ftbteams_version}")
     modCompileOnly("dev.ftb.mods:ftb-quests-forge:${ftbquests_version}")
 
+    modRuntimeOnly("dev.architectury:architectury-forge:${architectury_version}")
+    modRuntimeOnly("dev.ftb.mods:ftb-library-forge:${ftblibrary_version}")
+    modRuntimeOnly("dev.ftb.mods:ftb-teams-forge:${ftbteams_version}")
+    modRuntimeOnly("dev.ftb.mods:ftb-quests-forge:${ftbquests_version}")
+
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 

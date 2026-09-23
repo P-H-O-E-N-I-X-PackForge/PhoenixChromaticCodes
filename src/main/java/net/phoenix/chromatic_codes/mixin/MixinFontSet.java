@@ -24,14 +24,12 @@ public class MixinFontSet {
                                          CallbackInfoReturnable<GlyphInfo> cir) {
         ResourceLocation currentFont = ChromaticAPI.getCurrentFontContext();
 
-        // Ensure we only touch fonts belonging to your custom chromatic engine
         if (currentFont != null && currentFont.getNamespace().equals("phoenix_chromatic_codes")) {
             IChromaticEffect effect = ChromaticAPI.getByFont(currentFont);
             if (effect != null) {
                 GlyphInfo original = cir.getReturnValue();
                 if (original == null) return;
 
-                // Case 1: Custom Structural Letter Spacing Cushion Effect ([spacing])
                 if (effect instanceof LetterSpacingEffect spacingEffect) {
                     float cushion = spacingEffect.getSpacingCushion();
 
@@ -55,7 +53,6 @@ public class MixinFontSet {
                     return;
                 }
 
-                // Case 2: Standard Uniform Sizing Scale Factor Effect ([size])
                 float scale = effect.getScale(0, 0);
                 if (scale != 1.0f && scale > 0.0f) {
                     cir.setReturnValue(new GlyphInfo() {

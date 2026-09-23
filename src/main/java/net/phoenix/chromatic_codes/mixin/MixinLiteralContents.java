@@ -59,13 +59,10 @@ public abstract class MixinLiteralContents {
                     ChromaticAPI.isOutlineCode(next) ||
                     next == '[';
 
-            // 1. Always intercept CUSTOM codes, whether they use § or &
             if ((c == '§' || c == '&') && isCustomCode) {
                 return true;
             }
 
-            // 2. Intercept VANILLA codes ONLY if they use the & symbol.
-            // We ignore vanilla codes using § so we don't break lang files!
             if (c == '&' && net.minecraft.ChatFormatting.getByCode(next) != null) {
                 return true;
             }
@@ -84,7 +81,6 @@ public abstract class MixinLiteralContents {
                 char next = s.charAt(i + 1);
                 char lower = Character.toLowerCase(next);
 
-                // Named bracket code: &[name] → §[name]
                 if (lower == '[') {
                     int closeIdx = s.indexOf(']', i + 2);
                     if (closeIdx != -1) {
@@ -103,7 +99,6 @@ public abstract class MixinLiteralContents {
                         ChromaticAPI.isOutlineCode(lower) ||
                         net.minecraft.ChatFormatting.getByCode(lower) != null) {
 
-                            // Replace &X → §X for chromatic, custom, outline, AND vanilla codes.
                             sb.append('§').append(next);
                             i++;
                             continue;

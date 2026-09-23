@@ -22,11 +22,9 @@ public class MixinStringDecomposer {
             cancellable = true)
     private static void phoenix$injectCustomStyles(String text, int skip, Style currentStyle, Style defaultStyle,
                                                    FormattedCharSink sink, CallbackInfoReturnable<Boolean> cir) {
-        // Fast-fail if there are no formatting symbols whatsoever
+        
         if (text.indexOf('\u00a7') == -1) return;
 
-        // Reset LAST_CODE at the start of every decomposition so stale state
-        // from a previous render never bleeds into unrelated text.
         ChromaticColors.LAST_CODE.set(' ');
 
         int len = text.length();
@@ -38,7 +36,6 @@ public class MixinStringDecomposer {
             if (c0 == '\u00a7' && j + 1 < len) {
                 char c1 = Character.toLowerCase(text.charAt(j + 1));
 
-                // 1. Support for Vanilla Hex Codes (§x§r§g§b...)
                 if (c1 == 'x' && j + 13 < len) {
                     TextColor hexColor = TextColor.parseColor(text.substring(j, j + 14));
                     if (hexColor != null) {
@@ -48,7 +45,6 @@ public class MixinStringDecomposer {
                     }
                 }
 
-                // 2. Named bracket codes: §[name]
                 if (c1 == '[') {
                     int closeIdx = text.indexOf(']', j + 2);
                     if (closeIdx != -1) {
@@ -57,7 +53,7 @@ public class MixinStringDecomposer {
                         ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
                         if (namedFont != null) {
                             style = style.withFont(namedFont).withColor((TextColor) null);
-                            j = closeIdx; // skip past the ']'; outer ++j handles the rest
+                            j = closeIdx; 
                             continue;
                         }
 
@@ -67,11 +63,10 @@ public class MixinStringDecomposer {
                             j = closeIdx;
                             continue;
                         }
-                        // Unknown bracket code — fall through and let vanilla skip it
+                        
                     }
                 }
 
-                // 3. Check for Dynamic Effects (Wave, Shake, etc.)
                 ResourceLocation effectFont = ChromaticAPI.getFontForCode(c1);
                 if (effectFont != null) {
                     style = style.withFont(effectFont).withColor((TextColor) null);
@@ -79,7 +74,6 @@ public class MixinStringDecomposer {
                     continue;
                 }
 
-                // 4. Check for Custom Hex Colors (z, p, etc.)
                 if (ChromaticColors.CUSTOM_FORMATTING.containsKey(c1)) {
                     ChromaticColors.LAST_CODE.set(c1);
                     int hex = ChromaticColors.CUSTOM_FORMATTING.get(c1);
@@ -88,7 +82,6 @@ public class MixinStringDecomposer {
                     continue;
                 }
 
-                // 5. Fallback to Vanilla Formatting
                 ChatFormatting cf = ChatFormatting.getByCode(c1);
                 if (cf != null) {
                     if (cf == ChatFormatting.RESET) {

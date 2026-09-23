@@ -48,14 +48,10 @@ public abstract class MixinBakedGlyph {
         IChromaticEffect effect = ChromaticAPI.getCurrentEffect();
         if (effect == null) return;
 
-        // Vanilla multiplies all RGB channels by 0.25 for the shadow pass.
-        // Detect it and bail out so vanilla draws the shadow naturally —
-        // this prevents every glyph being drawn twice.
         if (red < 0.3f && green < 0.3f && blue < 0.3f) return;
 
         ci.cancel();
 
-        // 1. Transform Engine (Scaling)
         float scaleX = effect.getScaleX(x, y);
         float scaleY = effect.getScaleY(x, y);
         float uniformScale = effect.getScale(x, y);
@@ -74,7 +70,6 @@ public abstract class MixinBakedGlyph {
         float finalYUp = centerY - (charHalfHeight * scaleY) - 3.0f;
         float finalYDown = centerY + (charHalfHeight * scaleY) - 3.0f;
 
-        // 2. Localized X so gradients repeat consistently on short words
         float localizedX = x % 160.0f;
 
         int colorL = effect.getRenderColor(0, localizedX + this.left, y);
@@ -87,7 +82,6 @@ public abstract class MixinBakedGlyph {
         float gR = ((colorR >> 8) & 0xFF) / 255.0f;
         float bR = (colorR & 0xFF) / 255.0f;
 
-        // 3. Italics & Render
         float italicTop = italic ? 1.0F - 0.25F * (this.up - 3.0f) : 0.0F;
         float italicBottom = italic ? 1.0F - 0.25F * (this.down - 3.0f) : 0.0F;
 

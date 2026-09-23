@@ -8,7 +8,7 @@ public class VerticalShearEffect implements IChromaticEffect {
     private final float shearSlope;
 
     public VerticalShearEffect(float shearSlope) {
-        // Positive slopes climb uphill, negative slopes slide downhill
+        
         this.shearSlope = shearSlope != 0.0f ? shearSlope : -0.2f;
     }
 
@@ -19,7 +19,7 @@ public class VerticalShearEffect implements IChromaticEffect {
 
     @Override
     public float getYOffset(float x, float y) {
-        // Calculate progressive vertical displacement offset relative to segment start run
+        
         float localX = x - ChromaticAPI.getSegmentStartX();
         return localX * this.shearSlope;
     }

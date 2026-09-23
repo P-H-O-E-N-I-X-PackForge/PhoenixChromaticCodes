@@ -10,18 +10,17 @@ public class VerticalGradientEffect implements IChromaticEffect {
     private final int bottomColor;
 
     public VerticalGradientEffect(List<Integer> colors) {
-        // Requires exactly 2 colors in the configuration array to map properly
+        
         this.topColor = (colors != null && colors.size() > 0) ? colors.get(0) : 0xFFFFFF;
         this.bottomColor = (colors != null && colors.size() > 1) ? colors.get(1) : 0xAAAAAA;
     }
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-        // Return top color as a default fallback channel identifier
+        
         return this.topColor;
     }
 
-    // Direct explicit color interpolation helpers for top and bottom layout boundaries
     public int getTopColor() {
         return this.topColor;
     }

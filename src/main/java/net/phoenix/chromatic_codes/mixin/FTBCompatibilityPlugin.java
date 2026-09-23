@@ -34,6 +34,9 @@ public class FTBCompatibilityPlugin implements IMixinConfigPlugin {
         if (mixinClassName.endsWith("MixinFTBStringUtils")) {
             return isModLoaded("ftblibrary");
         }
+        if (mixinClassName.endsWith("MixinFTBClientTextComponentUtils")) {
+            return isModLoaded("ftblibrary");
+        }
         return true;
     }
 

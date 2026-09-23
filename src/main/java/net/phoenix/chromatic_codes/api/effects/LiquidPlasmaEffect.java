@@ -18,12 +18,11 @@ public class LiquidPlasmaEffect implements IChromaticEffect {
         double time = (System.currentTimeMillis() * 0.002) * warpSpeed;
         float localX = x - ChromaticAPI.getSegmentStartX();
 
-        // Overlapping sine-wave field equation to simulate dynamic fluid plasma
         double plasmaValue = Math.sin(localX * 0.05 + time) + Math.sin((y * 0.05 + time) * 1.5) +
                 Math.sin((localX + y) * 0.02 + time);
 
         float hue = (float) ((plasmaValue / 6.0) + 0.5) % 1.0f;
-        // Generate an incredibly rich, shifting cosmic color spectrum profile
+        
         return Color.HSBtoRGB(hue, 0.9f, 1.0f);
     }
 

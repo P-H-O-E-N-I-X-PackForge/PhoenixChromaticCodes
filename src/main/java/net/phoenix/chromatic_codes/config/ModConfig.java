@@ -25,10 +25,6 @@ public class ModConfig {
     @Configurable
     public CompatibilityConfig compatibility = new CompatibilityConfig();
 
-    // =========================================================================
-    // COMPATIBILITY CONFIG
-    // =========================================================================
-
     public static class CompatibilityConfig {
 
         @Configurable
@@ -44,24 +40,7 @@ public class ModConfig {
         public boolean disableInGuideME = true;
     }
 
-    // =========================================================================
-    // COLOR CONFIG
-    // =========================================================================
-
     public static class ColorConfig {
-
-        // ---------------------------------------------------------------
-        // VANILLA MINECRAFT FORMATTING CODES — DO NOT USE THESE AS KEYS
-        // ---------------------------------------------------------------
-        // Colors: 0-9, a-f
-        // 0 black 1 dark_blue 2 dark_green 3 dark_aqua
-        // 4 dark_red 5 dark_purple 6 gold 7 gray
-        // 8 dark_gray 9 blue a green b aqua
-        // c red d light_purple e yellow f white
-        //
-        // Formatting: k (obfuscated) l (bold) m (strikethrough)
-        // n (underline) o (italic) r (reset)
-        // ---------------------------------------------------------------
 
         @Configurable
         @Configurable.Comment({

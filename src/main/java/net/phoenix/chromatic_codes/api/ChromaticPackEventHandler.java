@@ -9,38 +9,22 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 
-/**
- * Listens on the MOD event bus for AddPackFindersEvent and injects
- * ChromaticDynamicPack so Minecraft discovers our generated font JSONs
- * without any manual file creation.
- *
- * Register this class in your mod constructor or via @Mod.EventBusSubscriber:
- *
- * MinecraftForge.EVENT_BUS <-- wrong, this is the FORGE bus
- * FMLJavaModLoadingContext.get().getModEventBus() <-- correct, this is the MOD bus
- *
- * The easiest way is the @Mod.EventBusSubscriber annotation below.
- * Make sure ChromaticEffectsRegistry.init() is called BEFORE this fires
- * (i.e. in FMLClientSetupEvent or FMLCommonSetupEvent, which both fire earlier).
- */
 @Mod.EventBusSubscriber(modid = PhoenixChromaticCodes.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ChromaticPackEventHandler {
 
     @SubscribeEvent
     public static void onAddPackFinders(AddPackFindersEvent event) {
-        // We only care about client resource packs (assets), not server datapacks
+        
         if (event.getPackType() != PackType.CLIENT_RESOURCES) return;
 
-        // Pack.readMetaAndCreate reads our pack.mcmeta via getRootResource,
-        // then creates a Pack entry pointing at ChromaticDynamicPack.INSTANCE.
         Pack pack = Pack.readMetaAndCreate(
-                ChromaticDynamicPack.INSTANCE.packId(),          // unique id string
-                Component.literal("Chromatic Dynamic Fonts"),    // display name
-                true,                                            // required = always active
-                (id) -> ChromaticDynamicPack.INSTANCE,           // ResourcesSupplier
+                ChromaticDynamicPack.INSTANCE.packId(),          
+                Component.literal("Chromatic Dynamic Fonts"),    
+                true,                                            
+                (id) -> ChromaticDynamicPack.INSTANCE,           
                 PackType.CLIENT_RESOURCES,
-                Pack.Position.TOP,                               // load on top so we aren't overridden
-                PackSource.BUILT_IN                              // shows as built-in in the UI
+                Pack.Position.TOP,                               
+                PackSource.BUILT_IN                              
         );
 
         if (pack != null) {

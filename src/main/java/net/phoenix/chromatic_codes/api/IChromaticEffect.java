@@ -44,15 +44,6 @@ public interface IChromaticEffect {
         return false;
     }
 
-    /**
-     * When true, MixinBakedGlyph will NOT cancel the vanilla render call.
-     * The effect's color is still applied to the Style in MixinStringRenderOutput
-     * (so vanilla renders with the right flat color), but all vertex transforms,
-     * scaling, and outline passes are skipped entirely.
-     *
-     * Use this for effects like "none" that want a pure static gradient baked into
-     * the style color with zero per-frame animation or geometry modification.
-     */
     default boolean isPassthrough() {
         return false;
     }

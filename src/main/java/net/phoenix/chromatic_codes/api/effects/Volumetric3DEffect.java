@@ -16,25 +16,6 @@ public class Volumetric3DEffect implements IChromaticEffect {
         this.depthLayers = depth > 0 ? (int) depth : 5;
     }
 
-    // -------------------------------------------------------------------------
-    // Why the old version looked flat
-    // -------------------------------------------------------------------------
-    // The original code passed zOffset = -0.15f * i to buffer.vertex(..., z, ...).
-    // In Minecraft's GUI rendering the projection is orthographic — the camera
-    // never uses Z to make things look closer or farther. Depth only matters for
-    // draw-order / z-fighting, not for visible perspective shift.
-    //
-    // A real isometric 3D illusion in a 2D GUI requires screen-space offsets:
-    // • Each shadow layer shifts UP-LEFT by a fixed pixel amount per layer
-    // (positive X and positive Y in screen space, since Y grows downward).
-    // • The darkest layer is drawn first (furthest back), front face last.
-    // • We keep z = 0 for all layers; draw order gives correct occlusion.
-    //
-    // The effect this produces: the front face looks like it's floating above a
-    // solid block of "side" colored depth behind it, exactly like embossed text.
-    // -------------------------------------------------------------------------
-
-    /** Pixels of screen-space shift per depth layer (tune to taste). */
     private static final float LAYER_STEP = 0.6f;
 
     @Override
@@ -50,8 +31,6 @@ public class Volumetric3DEffect implements IChromaticEffect {
         return this.depthLayers;
     }
 
-    // The screen-space isometric direction: up-left.
-    // X shift: negative = left. Y shift: negative = up (screen Y grows down).
     public float getLayerXShift() {
         return -LAYER_STEP;
     }

@@ -5,16 +5,16 @@ import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
 
 import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
-import dev.ftb.mods.ftbquests.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = TextUtils.class, remap = false)
-public class MixinFTBTextUtils {
+@Mixin(value = ClientTextComponentUtils.class, remap = false)
+public class MixinFTBClientTextComponentUtils {
 
     @Unique
     private static final Logger CHROMATIC_LOGGER = LogManager.getLogger("ChromaticCodes/FTB");
@@ -22,30 +22,23 @@ public class MixinFTBTextUtils {
     @Unique
     private static final String FTB_RESERVED = "#$";
 
-    @Redirect(
-              method = "parseRawText",
-              remap = false,
-              at = @At(
-                       value = "INVOKE",
-                       remap = false,
-                       target = "Ldev/ftb/mods/ftblibrary/util/client/ClientTextComponentUtils;parse(Ljava/lang/String;)Lnet/minecraft/network/chat/Component;"))
-    private static Component phoenix$modifyParse(String str) {
-        String replaced = phoenixChromaticCodes$replaceAmpersands(str);
+    @Inject(method = "parse", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void phoenix$interceptParse(String str, CallbackInfoReturnable<Component> cir) {
+        if (str == null || str.isEmpty()) return;
 
-        if (phoenixChromaticCodes$containsActionableCode(replaced)) {
+        String replaced = phoenix$replaceAmpersands(str);
 
-            return Component.literal(replaced.replace("\\n", "\n"));
+        if (phoenix$containsActionableCode(replaced)) {
+
+            cir.setReturnValue(Component.literal(replaced.replace("\\n", "\n")));
         }
-
-        return ClientTextComponentUtils.parse(replaced);
     }
 
     @Unique
-    private static boolean phoenixChromaticCodes$containsActionableCode(String s) {
+    private static boolean phoenix$containsActionableCode(String s) {
         for (int i = 0; i < s.length() - 1; i++) {
             if (s.charAt(i) == '§') {
                 char next = Character.toLowerCase(s.charAt(i + 1));
-
                 if (FTB_RESERVED.indexOf(next) != -1) continue;
                 if (ChromaticAPI.isRegistered(next) ||
                         ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
@@ -59,7 +52,7 @@ public class MixinFTBTextUtils {
     }
 
     @Unique
-    private static String phoenixChromaticCodes$replaceAmpersands(String str) {
+    private static String phoenix$replaceAmpersands(String str) {
         if (str == null || str.isEmpty() || !str.contains("&")) return str;
 
         StringBuilder sb = new StringBuilder();
@@ -85,20 +78,18 @@ public class MixinFTBTextUtils {
                 }
 
                 if (FTB_RESERVED.indexOf(next) != -1) {
-                    if (phoenixChromaticCodes$isOurCode(lower)) {
-                        
+                    if (phoenix$isOurCode(lower)) {
                         CHROMATIC_LOGGER.warn(
                                 "Chromatic Codes: '&{}' is reserved by FTB Quests inside quest text and cannot " +
                                         "be used as a formatting code here. Use it in chat, books, or signs instead.",
                                 next);
                     }
-                    
                     sb.append(c).append(next);
                     i++;
                     continue;
                 }
 
-                if (phoenixChromaticCodes$isAnyValidCode(next)) {
+                if (phoenix$isAnyValidCode(next)) {
                     sb.append('§').append(next);
                     i++;
                     continue;
@@ -110,13 +101,13 @@ public class MixinFTBTextUtils {
     }
 
     @Unique
-    private static boolean phoenixChromaticCodes$isOurCode(char lower) {
+    private static boolean phoenix$isOurCode(char lower) {
         return ChromaticAPI.isRegistered(lower) || ChromaticColors.CUSTOM_FORMATTING.containsKey(lower) ||
                 ChromaticAPI.isOutlineCode(lower);
     }
 
     @Unique
-    private static boolean phoenixChromaticCodes$isAnyValidCode(char c) {
+    private static boolean phoenix$isAnyValidCode(char c) {
         char lower = Character.toLowerCase(c);
         return (lower >= '0' && lower <= '9') ||
                 (lower >= 'a' && lower <= 'f') ||

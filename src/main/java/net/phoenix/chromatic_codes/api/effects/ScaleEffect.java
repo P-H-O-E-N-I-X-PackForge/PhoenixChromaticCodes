@@ -12,13 +12,13 @@ public class ScaleEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int original, float x, float y) {
-        // Return white (0xFFFFFF) so vanilla passes a valid color to BakedGlyph
+        
         return 0xFFFFFF;
     }
 
     @Override
     public float getScale(float x, float y) {
-        return this.scale; // e.g., 1.5f for 50% bigger
+        return this.scale; 
     }
 
     @Override
@@ -38,8 +38,7 @@ public class ScaleEffect implements IChromaticEffect {
 
     @Override
     public float getYOffset(float x, float y) {
-        // OPTIONAL: Adjust Y slightly downward when scaling up
-        // to keep the text aligned nicely with the text baseline.
+
         return 0;
     }
 }

@@ -21,14 +21,6 @@ public class ChromaticEffectsRegistry {
         parseAndRegisterNamed(ModConfig.INSTANCE.colors.namedGradients);
     }
 
-    // -------------------------------------------------------------------------
-    // Formatting registration
-    // -------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
-    // Color/effect registration (unchanged from original)
-    // -------------------------------------------------------------------------
-
     public static void parseAndRegister(String[] configEntries) {
         if (configEntries == null || configEntries.length == 0) {
             PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: No gradient entries found in config!");
@@ -46,9 +38,6 @@ public class ChromaticEffectsRegistry {
                 String movementId = parts[3].toLowerCase();
                 List<Integer> colors = resolveColors(parts[4].toLowerCase());
 
-                // 'outline' was previously a movementId here; it is now a formatting
-                // modifier in the [formatting] section. Skip silently with a warning
-                // so old configs don't crash.
                 if (movementId.equals("outline")) {
                     PhoenixChromaticCodes.LOGGER.warn(
                             "Phoenix Chromatic: Entry '{}' uses movementId 'outline', which has moved " +
@@ -92,7 +81,6 @@ public class ChromaticEffectsRegistry {
                 String movementId = parts[2].toLowerCase();
                 List<Integer> colors = resolveColors(parts[3].toLowerCase());
 
-                // Same guard as above for named entries using the old outline movementId
                 if (movementId.equals("outline")) {
                     PhoenixChromaticCodes.LOGGER.warn(
                             "Phoenix Chromatic: Named entry '{}' uses movementId 'outline', which has moved " +
@@ -127,9 +115,6 @@ public class ChromaticEffectsRegistry {
         return colors;
     }
 
-    /**
-     * Parses a string containing §[name] and §c style codes into a Component tree.
-     */
     public static Component parseCustomEffects(String text) {
         MutableComponent root = Component.literal("");
         int i = 0;
@@ -147,7 +132,6 @@ public class ChromaticEffectsRegistry {
 
                 char next = Character.toLowerCase(text.charAt(i + 1));
 
-                // Named bracket code: §[name]content
                 if (next == '[') {
                     int closeIdx = text.indexOf(']', i + 2);
                     if (closeIdx != -1) {
@@ -176,7 +160,6 @@ public class ChromaticEffectsRegistry {
                     }
                 }
 
-                // Single-char code
                 char code = next;
                 i += 2;
 

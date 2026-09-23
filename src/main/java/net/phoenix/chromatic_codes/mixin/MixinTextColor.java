@@ -17,7 +17,7 @@ public class MixinTextColor {
         char lastCode = ChromaticColors.LAST_CODE.get();
         Integer customColor = ChromaticColors.CUSTOM_FORMATTING.get(lastCode);
 
-        ChromaticColors.LAST_CODE.set(' '); // Always reset before any return path
+        ChromaticColors.LAST_CODE.set(' '); 
 
         if (customColor != null) {
             cir.setReturnValue(TextColor.fromRgb(customColor));

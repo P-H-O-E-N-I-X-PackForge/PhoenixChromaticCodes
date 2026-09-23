@@ -15,9 +15,8 @@ public class MatrixRainEffect implements IChromaticEffect {
         return 0x00FF00;
     }
 
-    // Intercepts UV shifting inside MixinBakedGlyph
     public float getVOffset() {
-        // Glides the V texture loop parameters downward over time
+        
         return (float) ((System.currentTimeMillis() * 0.001 * dropSpeed) % 1.0);
     }
 

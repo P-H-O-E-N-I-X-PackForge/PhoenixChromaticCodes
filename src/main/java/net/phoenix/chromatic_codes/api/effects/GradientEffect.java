@@ -22,12 +22,10 @@ public class GradientEffect implements IChromaticEffect {
         if (colors.length == 0) return original;
         if (colors.length == 1) return colors[0];
 
-        // Calculate progress based on time, speed, and X position (for the 'flow' effect)
         float time = (System.currentTimeMillis() / 1000f) * speed;
-        float offset = x * 0.01f; // Adjust this to make the gradient "stretch" or "squish"
+        float offset = x * 0.01f; 
         float progress = (time + offset) % 1.0f;
 
-        // Determine which two colors we are currently between
         float sectionProgress = progress * (colors.length - 1);
         int index = (int) sectionProgress;
         float factor = sectionProgress - index;

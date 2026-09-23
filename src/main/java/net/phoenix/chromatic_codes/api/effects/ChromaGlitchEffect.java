@@ -16,18 +16,18 @@ public class ChromaGlitchEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-        if (colors == null || colors.isEmpty()) return 0xFF0055; // Cyberpunk pink default
-        long timeSeed = System.currentTimeMillis() / 150; // Shift colors abruptly every 150ms
+        if (colors == null || colors.isEmpty()) return 0xFF0055; 
+        long timeSeed = System.currentTimeMillis() / 150; 
         int index = (int) ((timeSeed + (int) x) % colors.size());
         return colors.get(Math.abs(index));
     }
 
     @Override
     public float getXOffset(float x, float y) {
-        long timeWindow = System.currentTimeMillis() / 200; // Determine glitch window interval
-        // Create an unstable shaking artifact pop on random intervals
+        long timeWindow = System.currentTimeMillis() / 200; 
+        
         if ((timeWindow % 7 == 0 || timeWindow % 13 == 0) && rand.nextFloat() > 0.4f) {
-            return (rand.nextFloat() - 0.5f) * 3.5f; // Hard horizontal snap snap
+            return (rand.nextFloat() - 0.5f) * 3.5f; 
         }
         return 0;
     }

@@ -18,14 +18,14 @@ public class CompressEffect implements IChromaticEffect {
     @Override
     public float getScaleX(float x, float y) {
         double time = (System.currentTimeMillis() * 0.003) * pulseSpeed;
-        // Squeezes and stretches horizontally between 0.7x and 1.3x width
+        
         return 1.0f + (float) Math.sin(time) * 0.3f;
     }
 
     @Override
     public float getScaleY(float x, float y) {
         double time = (System.currentTimeMillis() * 0.003) * pulseSpeed;
-        // Inverts the wave so when it goes thin, it stretches taller!
+        
         return 1.0f - (float) Math.sin(time) * 0.2f;
     }
 

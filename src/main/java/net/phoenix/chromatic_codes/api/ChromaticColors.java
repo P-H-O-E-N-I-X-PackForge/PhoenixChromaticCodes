@@ -63,17 +63,16 @@ public class ChromaticColors {
             String content = part.substring(1);
             MutableComponent segment = Component.literal(content);
 
-            // 1. Check if it's a Dynamic Effect (Wave/Shake/Gradient)
             ResourceLocation dynamicFont = ChromaticAPI.getFontForCode(code);
             if (dynamicFont != null) {
                 segment = segment.withStyle(s -> s.withFont(dynamicFont));
             }
-            // 2. Check if it's a Static Custom Color
+            
             else if (CUSTOM_FORMATTING.containsKey(code)) {
                 int color = CUSTOM_FORMATTING.get(code);
                 segment = segment.withStyle(s -> s.withColor(color));
             }
-            // 3. Fallback for vanilla
+            
             else {
                 root.append(Component.literal("§" + part));
                 continue;
@@ -84,7 +83,7 @@ public class ChromaticColors {
     }
 
     public static void init() {
-        // --- Single-char colors ---
+        
         String[] colorSettings = ModConfig.INSTANCE.colors.customColors;
         if (colorSettings != null) {
             for (String entry : colorSettings) {
@@ -108,19 +107,18 @@ public class ChromaticColors {
             }
         }
 
-        // --- Named bracket colors ---
         String[] namedColorSettings = ModConfig.INSTANCE.colors.namedColors;
         if (namedColorSettings != null) {
             for (String entry : namedColorSettings) {
                 if (entry == null || entry.isEmpty()) continue;
                 try {
-                    // Format: "[name]:hex"
+                    
                     if (!entry.startsWith("[")) continue;
                     int bracket = entry.indexOf(']');
                     if (bracket < 2) continue;
 
                     String name = entry.substring(1, bracket);
-                    // +1 for ']', +1 for ':'
+                    
                     if (bracket + 2 > entry.length()) continue;
                     String hexPart = entry.substring(bracket + 2).replace("#", "").trim();
 
