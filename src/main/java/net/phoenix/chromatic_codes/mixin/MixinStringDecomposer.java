@@ -32,7 +32,8 @@ public class MixinStringDecomposer {
         for (int j = skip; j < len; ++j) {
             char c0 = text.charAt(j);
 
-            if (c0 == '\u00a7' && j + 1 < len) {
+            if (c0 == '\u00a7') {
+                if (j + 1 >= len) break;
                 char c1 = Character.toLowerCase(text.charAt(j + 1));
 
                 if (c1 == 'x' && j + 13 < len) {
@@ -95,6 +96,31 @@ public class MixinStringDecomposer {
                     }
                 }
                 j++;
+            } else if (Character.isHighSurrogate(c0)) {
+                if (j + 1 >= len) {
+                    if (!sink.accept(j, currentStyle, 0xFFFD)) {
+                        cir.setReturnValue(false);
+                        return;
+                    }
+                    break;
+                }
+                char c2 = text.charAt(j + 1);
+                if (Character.isLowSurrogate(c2)) {
+                    if (!sink.accept(j, style, Character.toCodePoint(c0, c2))) {
+                        cir.setReturnValue(false);
+                        return;
+                    }
+                    j++;
+                } else if (!sink.accept(j, currentStyle, 0xFFFD)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
+            } else if (Character.isSurrogate(c0)) {
+                // lone low surrogate
+                if (!sink.accept(j, currentStyle, 0xFFFD)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
             } else {
                 if (!sink.accept(j, style, c0)) {
                     cir.setReturnValue(false);

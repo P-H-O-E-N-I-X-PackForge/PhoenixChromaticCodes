@@ -171,3 +171,22 @@ tasks.withType(JavaCompile).configureEach {
     options.release.set(17)
     options.compilerArgs << "-Aquiet=true"
 }
+
+publishing {
+    publications {
+        create('mavenJava', MavenPublication) {
+            artifactId = base.archivesName.get()
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "Repsy"
+            url = uri("https://repo.repsy.io/mvn/user75142941/phoenixsuite")
+            credentials {
+                username = project.findProperty("repsyUsername") ?: System.getenv("REPSY_USERNAME")
+                password = project.findProperty("repsyPassword") ?: System.getenv("REPSY_PASSWORD")
+            }
+        }
+    }
+}
