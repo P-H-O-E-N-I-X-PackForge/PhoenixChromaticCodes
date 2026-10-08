@@ -29,8 +29,12 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        name 'FirstDarkDev'
-        url "https://maven.firstdark.dev/snapshots/"
+        name = "Repsy"
+        url = uri("https://repo.repsy.io/mvn/user75142941/phoenixsuite")
+    }
+    maven {
+        name = 'FirstDarkDev'
+        url = "https://maven.firstdark.dev/snapshots/"
     }
     maven {
         name = "BlameJared"
@@ -41,13 +45,13 @@ repositories {
         content {
             includeGroup("com.tterrag.registrate")
         }
-        maven {
-            name = "ftbMavenReleases"
-            url = uri("https://maven.ftb.dev/releases")
-        }
-        maven {
-            url = "https://maven.architectury.dev"
-        }
+    }
+    maven {
+        name = "ftbMavenReleases"
+        url = uri("https://maven.ftb.dev/releases")
+    }
+    maven {
+        url = "https://maven.architectury.dev"
     }
 }
 
