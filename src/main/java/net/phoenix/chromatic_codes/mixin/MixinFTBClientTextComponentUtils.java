@@ -69,7 +69,8 @@ public class MixinFTBClientTextComponentUtils {
                         if (ChromaticAPI.isNamedRegistered(name) ||
                                 ChromaticAPI.isNamedOutlineCode(name) ||
                                 ChromaticColors.NAMED_CUSTOM_FORMATTING
-                                        .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
+                                        .containsKey(ChromaticAPI.normalizeNamedKey(name)) ||
+                                ChromaticAPI.isInlineCode(name)) {
                             sb.append('§').append(str, i + 1, closeIdx + 1);
                             i = closeIdx;
                             continue;

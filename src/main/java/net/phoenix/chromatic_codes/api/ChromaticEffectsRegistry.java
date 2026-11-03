@@ -143,7 +143,8 @@ public class ChromaticEffectsRegistry {
                         i = contentEnd == -1 ? len : contentEnd;
 
                         MutableComponent seg = Component.literal(content);
-                        ResourceLocation font = ChromaticAPI.getFontForNamedCode(name);
+                        ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
+                        ResourceLocation font = namedFont != null ? namedFont : InlineEffects.fontFor(name);
                         if (font != null) {
                             seg = seg.withStyle(s -> s.withFont(font).withColor((TextColor) null));
                         } else if (ChromaticColors.NAMED_CUSTOM_FORMATTING

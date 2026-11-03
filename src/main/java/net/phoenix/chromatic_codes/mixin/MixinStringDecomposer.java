@@ -64,6 +64,12 @@ public class MixinStringDecomposer {
                             continue;
                         }
 
+                        ResourceLocation inlineFont = ChromaticAPI.getFontForInlineCode(name);
+                        if (inlineFont != null) {
+                            style = style.withFont(inlineFont).withColor((TextColor) null);
+                            j = closeIdx;
+                            continue;
+                        }
                     }
                 }
 
@@ -116,7 +122,7 @@ public class MixinStringDecomposer {
                     return;
                 }
             } else if (Character.isSurrogate(c0)) {
-                // lone low surrogate
+                
                 if (!sink.accept(j, currentStyle, 0xFFFD)) {
                     cir.setReturnValue(false);
                     return;

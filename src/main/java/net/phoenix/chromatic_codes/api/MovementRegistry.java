@@ -15,6 +15,10 @@ public class MovementRegistry {
         REGISTRY.put(id.toLowerCase(), factory);
     }
 
+    public static boolean has(String id) {
+        return id != null && REGISTRY.containsKey(id.toLowerCase());
+    }
+
     public static IChromaticEffect create(String id, float colorSpeed, float moveSpeed, List<Integer> colors) {
         MovementFactory factory = REGISTRY.get(id.toLowerCase());
 

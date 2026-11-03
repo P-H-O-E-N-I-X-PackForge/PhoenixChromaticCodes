@@ -88,7 +88,8 @@ public abstract class MixinLiteralContents {
                         if (ChromaticAPI.isNamedRegistered(name) ||
                                 ChromaticAPI.isNamedOutlineCode(name) ||
                                 ChromaticColors.NAMED_CUSTOM_FORMATTING
-                                        .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
+                                        .containsKey(ChromaticAPI.normalizeNamedKey(name)) ||
+                                ChromaticAPI.isInlineCode(name)) {
                             sb.append('§').append(s, i + 1, closeIdx + 1);
                             i = closeIdx;
                             continue;

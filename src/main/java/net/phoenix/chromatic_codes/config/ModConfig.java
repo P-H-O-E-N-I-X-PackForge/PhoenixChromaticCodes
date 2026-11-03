@@ -54,6 +54,23 @@ public class ModConfig {
 
         @Configurable
         @Configurable.Comment({
+                "Allow one-off inline definitions written straight into text (chat, signs, books...),",
+                "so players can make a gradient/effect on the spot without it being defined in this config.",
+                "Syntax (works with & or §):",
+                "  &[~FF0000,0000FF]                 static gradient (3-digit hex works too: &[~f00,00f])",
+                "  &[~wave:FF0000,00FF00]            movement:colors",
+                "  &[~1.5:2.0:wave:FF0000,00FF00]    colorSpeed:moveSpeed:movement:colors (same order as the lists above)",
+                "  &[~rainbow]  /  &[~wave:rainbow]  'rainbow' can be used as the color list",
+                "  &[~size]  /  &[~spacing]          a movement id on its own uses that movement's defaults",
+                "Movement IDs are the same as in the gradient lists ('outline' is not supported inline).",
+                "Limits: at most 16 colors, speeds clamped to +-32, '3d' depth capped at 16.",
+                "Set to false if only codes defined in this config should be usable (e.g. in a modpack).",
+                "Default: true"
+        })
+        public boolean allowInlineCodes = true;
+
+        @Configurable
+        @Configurable.Comment({
                 "Add custom single-character color codes here.",
                 "Format: 'char:hex' (e.g., 'z:BF00FF')",
                 "Do NOT use vanilla codes (0-9, a-f, k-o, r) as keys."

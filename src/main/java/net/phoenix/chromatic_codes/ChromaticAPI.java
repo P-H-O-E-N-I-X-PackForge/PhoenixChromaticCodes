@@ -2,6 +2,7 @@ package net.phoenix.chromatic_codes;
 
 import net.minecraft.resources.ResourceLocation;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
+import net.phoenix.chromatic_codes.api.InlineEffects;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +37,17 @@ public class ChromaticAPI {
     }
 
     public static IChromaticEffect getByFont(ResourceLocation fontId) {
-        return FONT_TO_EFFECT.get(fontId);
+        IChromaticEffect effect = FONT_TO_EFFECT.get(fontId);
+        if (effect == null && InlineEffects.isInlineFont(fontId)) return InlineEffects.effectFor(fontId);
+        return effect;
+    }
+
+    public static ResourceLocation getFontForInlineCode(String name) {
+        return InlineEffects.fontFor(name);
+    }
+
+    public static boolean isInlineCode(String name) {
+        return InlineEffects.isValid(name);
     }
 
     public static boolean isRegistered(char code) {
