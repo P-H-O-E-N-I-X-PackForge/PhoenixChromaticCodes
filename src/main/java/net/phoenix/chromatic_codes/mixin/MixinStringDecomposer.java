@@ -122,7 +122,7 @@ public class MixinStringDecomposer {
                     return;
                 }
             } else if (Character.isSurrogate(c0)) {
-                
+
                 if (!sink.accept(j, currentStyle, 0xFFFD)) {
                     cir.setReturnValue(false);
                     return;
