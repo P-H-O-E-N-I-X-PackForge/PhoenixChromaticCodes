@@ -37,15 +37,31 @@ public class MixinFTBClientTextComponentUtils {
     @Unique
     private static boolean phoenix$containsActionableCode(String s) {
         for (int i = 0; i < s.length() - 1; i++) {
-            if (s.charAt(i) == '§') {
-                char next = Character.toLowerCase(s.charAt(i + 1));
-                if (FTB_RESERVED.indexOf(next) != -1) continue;
-                if (ChromaticAPI.isRegistered(next) ||
-                        ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
-                        ChromaticAPI.isOutlineCode(next) ||
-                        next == '[') {
-                    return true;
+            if (s.charAt(i) != '§') continue;
+
+            char next = s.charAt(i + 1);
+            char lower = Character.toLowerCase(next);
+            if (FTB_RESERVED.indexOf(lower) != -1) continue;
+
+            if (lower == '[') {
+                int closeIdx = s.indexOf(']', i + 2);
+                if (closeIdx != -1) {
+                    String name = s.substring(i + 2, closeIdx);
+                    if (ChromaticAPI.isNamedRegistered(name) ||
+                            ChromaticAPI.isNamedOutlineCode(name) ||
+                            ChromaticColors.NAMED_CUSTOM_FORMATTING
+                                    .containsKey(ChromaticAPI.normalizeNamedKey(name)) ||
+                            ChromaticAPI.isInlineCode(name)) {
+                        return true;
+                    }
                 }
+                continue;
+            }
+
+            if (ChromaticAPI.isRegistered(lower) ||
+                    ChromaticColors.CUSTOM_FORMATTING.containsKey(lower) ||
+                    ChromaticAPI.isOutlineCode(lower)) {
+                return true;
             }
         }
         return false;
