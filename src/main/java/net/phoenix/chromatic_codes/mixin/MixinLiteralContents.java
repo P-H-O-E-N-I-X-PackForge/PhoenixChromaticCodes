@@ -53,24 +53,39 @@ public abstract class MixinLiteralContents {
         cir.setReturnValue(stopResult[0] != null ? stopResult[0] : Optional.empty());
     }
 
+    // A bracket is only "actionable" if the name inside it is actually registered. Flagging every
+    // "&[" / "§[" regardless (as this used to) meant plain text with an unregistered bracket name
+    // in it - e.g. a lang entry someone wrote ahead of defining the code - still got routed through
+    // our replacement visit() below instead of vanilla's own, which iterates the text differently
+    // (codepoint-by-codepoint via StringDecomposer.iterateFormatted vs. vanilla's bulk visit) and
+    // throws off tooltip/line-wrapping callers that truncate based on how visit() is called.
     @Unique
     private static boolean phoenix$containsActionableCode(String s) {
         for (int i = 0; i < s.length() - 1; i++) {
             char c = s.charAt(i);
-            char next = Character.toLowerCase(s.charAt(i + 1));
+            if (c != '§' && c != '&') continue;
 
-            boolean isCustomCode = ChromaticAPI.isRegistered(next) ||
-                    ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
-                    ChromaticAPI.isOutlineCode(next) ||
-                    next == '[';
+            char next = s.charAt(i + 1);
+            char lower = Character.toLowerCase(next);
 
-            if ((c == '§' || c == '&') && isCustomCode) {
-                return true;
-            }
-
-            if (c == '&' && net.minecraft.ChatFormatting.getByCode(next) != null) {
-                return true;
-            }
+            if (lower == '[') {
+                int closeIdx = s.indexOf(']', i + 2);
+                if (closeIdx != -1) {
+                    String name = s.substring(i + 2, closeIdx);
+                    if (ChromaticAPI.isNamedRegistered(name) ||
+                            ChromaticAPI.isNamedOutlineCode(name) ||
+                            ChromaticColors.NAMED_CUSTOM_FORMATTING
+                                    .containsKey(ChromaticAPI.normalizeNamedKey(name)) ||
+                            ChromaticAPI.isInlineCode(name)) {
+                        return true;
+                    }
+                }
+            } else if (ChromaticAPI.isRegistered(lower) ||
+                    ChromaticColors.CUSTOM_FORMATTING.containsKey(lower) ||
+                    ChromaticAPI.isOutlineCode(lower) ||
+                    (c == '&' && net.minecraft.ChatFormatting.getByCode(lower) != null)) {
+                        return true;
+                    }
         }
         return false;
     }

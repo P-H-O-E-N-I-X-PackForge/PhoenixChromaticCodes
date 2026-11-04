@@ -44,21 +44,40 @@ public class MixinFTBTextUtils {
         return ClientTextComponentUtils.parse(replaced);
     }
 
+    // Only claim a bracket as actionable if its name is actually registered - otherwise plain text
+    // with an unregistered "§[name]" in it (e.g. written ahead of the code being defined) would get
+    // routed through our literal Component instead of the real FTB parser for no reason.
     @Unique
     private static boolean phoenixChromaticCodes$containsActionableCode(String s) {
         for (int i = 0; i < s.length() - 1; i++) {
-            if (s.charAt(i) == '§') {
-                char next = Character.toLowerCase(s.charAt(i + 1));
-                // Never claim ownership for FTB-reserved codes even if they happen
-                // to match one of our registered chars (e.g. §# from "§&#...").
-                // Returning false here lets ClientTextComponentUtils.parse handle it.
-                if (FTB_RESERVED.indexOf(next) != -1) continue;
-                if (ChromaticAPI.isRegistered(next) ||
-                        ChromaticColors.CUSTOM_FORMATTING.containsKey(next) ||
-                        ChromaticAPI.isOutlineCode(next) ||
-                        next == '[') {
-                    return true;
+            if (s.charAt(i) != '§') continue;
+
+            char next = s.charAt(i + 1);
+            char lower = Character.toLowerCase(next);
+            // Never claim ownership for FTB-reserved codes even if they happen
+            // to match one of our registered chars (e.g. §# from "§&#...").
+            // Returning false here lets ClientTextComponentUtils.parse handle it.
+            if (FTB_RESERVED.indexOf(lower) != -1) continue;
+
+            if (lower == '[') {
+                int closeIdx = s.indexOf(']', i + 2);
+                if (closeIdx != -1) {
+                    String name = s.substring(i + 2, closeIdx);
+                    if (ChromaticAPI.isNamedRegistered(name) ||
+                            ChromaticAPI.isNamedOutlineCode(name) ||
+                            ChromaticColors.NAMED_CUSTOM_FORMATTING
+                                    .containsKey(ChromaticAPI.normalizeNamedKey(name)) ||
+                            ChromaticAPI.isInlineCode(name)) {
+                        return true;
+                    }
                 }
+                continue;
+            }
+
+            if (ChromaticAPI.isRegistered(lower) ||
+                    ChromaticColors.CUSTOM_FORMATTING.containsKey(lower) ||
+                    ChromaticAPI.isOutlineCode(lower)) {
+                return true;
             }
         }
         return false;

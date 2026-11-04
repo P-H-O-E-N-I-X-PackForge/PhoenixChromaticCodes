@@ -96,6 +96,9 @@ public class ModConfig {
                 "Format: 'char:hex' (e.g., 'z:BF00FF')",
                 "Do NOT use vanilla codes (0-9, a-f, k-o, r) as keys."
         })
+        // The in-game config GUI's per-entry text box defaults to 32 characters; without this,
+        // editing an entry there silently truncates it past that length.
+        @Configurable.Gui.CharacterLimit(256)
         public String[] customColors = new String[] {
                 "z:BF00FF",
                 "t:00FF80",
@@ -109,6 +112,7 @@ public class ModConfig {
                 "Movement IDs: wave, shake, pulse, static_rainbow, glitch, discord, breath, stretch, none, mirror, vertical, spacing, slant, rainbow_wave, chroma, shear, chroma_wave, wobble, compress, fade, 3d, matrix_rain, 3d_spin, liquid_plasma",
                 "Do NOT use vanilla codes (0-9, a-f, k-o, r) as keys."
         })
+        @Configurable.Gui.CharacterLimit(256)
         public String[] customGradients = new String[] {
                 "w:1.0:1.0:wave:rainbow",
                 "p:1.0:2.0:pulse:FF0000,990000",
@@ -127,6 +131,7 @@ public class ModConfig {
                 "Example: '[phoenix]:BF00FF'  ->  use as &[phoenix] in chat",
                 "Named codes are completely separate from single-char codes — no overlap ever."
         })
+        @Configurable.Gui.CharacterLimit(256)
         public String[] namedColors = new String[] {
                 "[phoenix]:BF00FF",
         };
@@ -144,6 +149,7 @@ public class ModConfig {
                 " - 'shear': 'moveSpeed' controls vertical progressive staircase step ratios. (e.g., [uphill]:0.0:0.2:shear:FFFFFF)",
                 " - '3d': 'moveSpeed' specifies the number of stacked structural extrusion layers. (e.g., [3d_block]:0.0:5.0:3d:FFCC00,443300)"
         })
+        @Configurable.Gui.CharacterLimit(256)
         public String[] namedGradients = new String[] {
                 "[rainbow]:1.0:1.0:wave:rainbow",
                 "[matrix]:1.0:3.0:glitch:00FF00,005500",
