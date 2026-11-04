@@ -1,6 +1,7 @@
 package net.phoenix.chromatic_codes.mixin;
 
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
+import net.phoenix.chromatic_codes.config.ConfigFileSanitizer;
 import net.phoenix.chromatic_codes.config.ModConfig;
 import net.phoenix.chromatic_codes.diagnostics.ConfigDiagnostics;
 
@@ -12,9 +13,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Temporary diagnostic hooks into the Configuration library's own read/write cycle, scoped to just
- * our config id, to track down a reported truncation/corruption bug in phoenix_chromatic_codes.yaml.
- * Remove once that bug is understood.
+ * Hooks into the Configuration library's own read/write cycle, scoped to just our config id:
+ * - logs the raw file and the in-memory arrays at each step (diagnostic logging, kept to help
+ * track down anything similar in the future)
+ * - normalizes any tab-indented lines back to spaces before the real read happens, working around
+ * a YamlFormat bug that otherwise silently drops everything after a tab-indented line (see
+ * ConfigFileSanitizer)
  */
 @Mixin(value = ConfigIO.class, remap = false)
 public class MixinConfigIODiagnostics {
@@ -23,6 +27,7 @@ public class MixinConfigIODiagnostics {
     private static void phoenix$beforeRead(ConfigHolder<?> holder, CallbackInfo ci) {
         if (!phoenix$isOurs(holder)) return;
         ConfigDiagnostics.logRawFile(ConfigIO.getConfigFile(holder), "BEFORE readConfig");
+        ConfigFileSanitizer.normalizeLeadingTabs(ConfigIO.getConfigFile(holder));
     }
 
     @Inject(method = "readConfig", at = @At("RETURN"), remap = false)
