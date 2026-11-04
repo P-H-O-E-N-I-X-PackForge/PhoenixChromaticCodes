@@ -52,11 +52,9 @@ public abstract class MixinBakedGlyph {
         IChromaticEffect effect = ChromaticAPI.getCurrentEffect();
         if (effect == null) return;
 
-
         if (red < 0.3f && green < 0.3f && blue < 0.3f) return;
 
         ci.cancel();
-
 
         float scaleX = effect.getScaleX(x, y);
         float scaleY = effect.getScaleY(x, y);

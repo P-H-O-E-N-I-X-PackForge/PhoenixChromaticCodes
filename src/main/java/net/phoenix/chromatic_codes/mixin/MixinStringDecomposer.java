@@ -75,6 +75,13 @@ public class MixinStringDecomposer {
                             j = closeIdx;
                             continue;
                         }
+
+                        ResourceLocation inlineFont = ChromaticAPI.getFontForInlineCode(name);
+                        if (inlineFont != null) {
+                            style = style.withFont(inlineFont).withColor((TextColor) null);
+                            j = closeIdx;
+                            continue;
+                        }
                     }
                 }
 

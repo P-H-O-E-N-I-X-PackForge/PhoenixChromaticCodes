@@ -4,8 +4,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
 import net.phoenix.chromatic_codes.api.IChromaticLayoutExtensions;
+import net.phoenix.chromatic_codes.api.InlineEffects;
 
+import icyllis.modernui.graphics.text.FontCollection;
 import icyllis.modernui.mc.text.TextLayout;
+import icyllis.modernui.mc.text.TextLayoutEngine;
 import icyllis.modernui.mc.text.TextLayoutProcessor;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,6 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -34,6 +38,19 @@ public abstract class MixinTextLayoutProcessor {
     @Inject(method = "reset", at = @At("TAIL"))
     private void phoenix$onReset(CallbackInfo ci) {
         phoenix$glyphEffects.clear();
+    }
+
+    // Inline-defined effects (see InlineEffects) live in font ids that don't exist as resources.
+    // Without this, ModernUI's own font lookup inside handleStyleRun would resolve them to its
+    // missing-glyph fallback and render boxes. fontName itself is left untouched (and still carries
+    // the inline definition for the ChromaticAPI.getByFont lookup below) - only this lookup is redirected.
+    @Redirect(method = "handleStyleRun",
+              remap = false,
+              at = @At(value = "INVOKE",
+                       remap = false,
+                       target = "Licyllis/modernui/mc/text/TextLayoutEngine;getFontCollection(Lnet/minecraft/resources/ResourceLocation;)Licyllis/modernui/graphics/text/FontCollection;"))
+    private FontCollection phoenix$resolveInlineFont(TextLayoutEngine engine, ResourceLocation fontName) {
+        return engine.getFontCollection(InlineEffects.isInlineFont(fontName) ? InlineEffects.BASE_FONT : fontName);
     }
 
     // Record how many glyphs existed before this run's shaping call, so we can add exactly

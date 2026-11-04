@@ -17,12 +17,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = TextLayout.class, remap = false)
 public abstract class MixinTextLayoutDraw {
 
-    // Using the raw SRG/Intermediary method handles to bypass Interface/Default method mapping bugs
+    // ModernUI's own class files still carry SRG/intermediary call sites (m_252986_/m_6122_), but by the
+    // time Mixin's transformer sees them NeoForge's own class loader has already renamed those calls to
+    // the Mojang-mapped names below - so, with remap = false, these have to be the renamed names too.
     @Unique
-    private static final String VERTEX_TARGET = "Lcom/mojang/blaze3d/vertex/VertexConsumer;m_252986_(Lorg/joml/Matrix4f;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;";
+    private static final String VERTEX_TARGET = "Lcom/mojang/blaze3d/vertex/VertexConsumer;addVertex(Lorg/joml/Matrix4f;FFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;";
 
     @Unique
-    private static final String COLOR_TARGET = "Lcom/mojang/blaze3d/vertex/VertexConsumer;m_6122_(IIII)Lcom/mojang/blaze3d/vertex/VertexConsumer;";
+    private static final String COLOR_TARGET = "Lcom/mojang/blaze3d/vertex/VertexConsumer;setColor(IIII)Lcom/mojang/blaze3d/vertex/VertexConsumer;";
 
     @Unique
     private int phoenix$currentGlyphIndex = 0;

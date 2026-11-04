@@ -22,6 +22,28 @@ public class ModConfig {
     @Configurable
     public ColorConfig colors = new ColorConfig();
 
+    @Configurable
+    public CompatibilityConfig compatibility = new CompatibilityConfig();
+
+    // =========================================================================
+    // COMPATIBILITY CONFIG
+    // =========================================================================
+
+    public static class CompatibilityConfig {
+
+        @Configurable
+        @Configurable.Comment({
+                "Disable Chromatic Codes parsing while a GuideME guidebook screen is open.",
+                "GuideME pages are plain descriptive text, so an '&' immediately followed by",
+                "a registered code letter (e.g. an ingredient list reading '... & Steel' when",
+                "'s' is a registered code) would otherwise be misread as a chromatic code and",
+                "break the guide's formatting. Chromatic codes keep working everywhere else",
+                "(chat, tooltips, signs, books, other GUIs).",
+                "Default: true"
+        })
+        public boolean disableInGuideME = true;
+    }
+
     // =========================================================================
     // COLOR CONFIG
     // =========================================================================
@@ -50,6 +72,23 @@ public class ModConfig {
                 "Default: true"
         })
         public boolean namedCodesCaseSensitive = true;
+
+        @Configurable
+        @Configurable.Comment({
+                "Allow one-off inline definitions written straight into text (chat, signs, books...),",
+                "so players can make a gradient/effect on the spot without it being defined in this config.",
+                "Syntax (works with & or §):",
+                "  &[~FF0000,0000FF]                 static gradient (3-digit hex works too: &[~f00,00f])",
+                "  &[~wave:FF0000,00FF00]            movement:colors",
+                "  &[~1.5:2.0:wave:FF0000,00FF00]    colorSpeed:moveSpeed:movement:colors (same order as the lists above)",
+                "  &[~rainbow]  /  &[~wave:rainbow]  'rainbow' can be used as the color list",
+                "  &[~size]  /  &[~spacing]          a movement id on its own uses that movement's defaults",
+                "Movement IDs are the same as in the gradient lists ('outline' is not supported inline).",
+                "Limits: at most 16 colors, speeds clamped to +-32, '3d' depth capped at 16.",
+                "Set to false if only codes defined in this config should be usable (e.g. in a modpack).",
+                "Default: true"
+        })
+        public boolean allowInlineCodes = true;
 
         @Configurable
         @Configurable.Comment({

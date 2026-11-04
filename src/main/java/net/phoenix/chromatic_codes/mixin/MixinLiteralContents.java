@@ -6,6 +6,7 @@ import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.util.StringDecomposer;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
+import net.phoenix.chromatic_codes.compat.GuideMeCompat;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,6 +28,8 @@ public abstract class MixinLiteralContents {
             remap = false)
     private <T> void phoenix$decomposeLiteral(FormattedText.StyledContentConsumer<T> consumer, Style style,
                                               CallbackInfoReturnable<Optional<T>> cir) {
+        if (GuideMeCompat.shouldSkip()) return;
+
         // The decompile verifies the record property getter method name is exactly .text()
         String rawText = ((PlainTextContents.LiteralContents) (Object) this).text();
 
@@ -90,7 +93,8 @@ public abstract class MixinLiteralContents {
                         if (ChromaticAPI.isNamedRegistered(name) ||
                                 ChromaticAPI.isNamedOutlineCode(name) ||
                                 ChromaticColors.NAMED_CUSTOM_FORMATTING
-                                        .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
+                                        .containsKey(ChromaticAPI.normalizeNamedKey(name)) ||
+                                ChromaticAPI.isInlineCode(name)) {
                             sb.append('§').append(s, i + 1, closeIdx + 1);
                             i = closeIdx;
                             continue;

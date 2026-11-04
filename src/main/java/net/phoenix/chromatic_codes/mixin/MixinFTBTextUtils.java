@@ -38,7 +38,7 @@ public class MixinFTBTextUtils {
         String replaced = phoenixChromaticCodes$replaceAmpersands(str);
 
         if (phoenixChromaticCodes$containsActionableCode(replaced)) {
-            return Component.literal(replaced);
+            return Component.literal(replaced.replace("\\n", "\n"));
         }
 
         return ClientTextComponentUtils.parse(replaced);
@@ -83,7 +83,8 @@ public class MixinFTBTextUtils {
                         if (ChromaticAPI.isNamedRegistered(name) ||
                                 ChromaticAPI.isNamedOutlineCode(name) ||
                                 ChromaticColors.NAMED_CUSTOM_FORMATTING
-                                        .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
+                                        .containsKey(ChromaticAPI.normalizeNamedKey(name)) ||
+                                ChromaticAPI.isInlineCode(name)) {
                             sb.append('§').append(str, i + 1, closeIdx + 1);
                             i = closeIdx;
                             continue;
