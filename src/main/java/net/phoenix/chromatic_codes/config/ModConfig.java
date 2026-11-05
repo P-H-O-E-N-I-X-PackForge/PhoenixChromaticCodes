@@ -38,6 +38,15 @@ public class ModConfig {
                 "Default: true"
         })
         public boolean disableInGuideME = true;
+
+        @Configurable
+        @Configurable.Comment({
+                "Log a full dump of this config file's contents (raw file + parsed values) every time",
+                "it's read or written. Useful for diagnosing a config that isn't loading/saving the way",
+                "you expect, but noisy - leave this off unless you're actively chasing a config bug.",
+                "Default: false"
+        })
+        public boolean verboseConfigDiagnostics = false;
     }
 
     public static class ColorConfig {
