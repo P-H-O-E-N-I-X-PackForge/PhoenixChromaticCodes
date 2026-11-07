@@ -19,6 +19,11 @@ public class MovementRegistry {
         return id != null && REGISTRY.containsKey(id.toLowerCase());
     }
 
+    /** All registered movement ids (lowercase). */
+    public static java.util.Set<String> ids() {
+        return java.util.Collections.unmodifiableSet(REGISTRY.keySet());
+    }
+
     // Must take 4 arguments: id, colorSpeed, moveSpeed, colors
     public static IChromaticEffect create(String id, float colorSpeed, float moveSpeed, List<Integer> colors) {
         // Force lowercase to avoid "Wave" vs "wave" issues

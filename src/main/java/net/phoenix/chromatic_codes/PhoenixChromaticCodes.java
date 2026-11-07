@@ -54,10 +54,14 @@ public class PhoenixChromaticCodes {
         MovementRegistry.register("3d_spin", (cs, ms, colors) -> new MatrixSpinEffect(ms));
         MovementRegistry.register("liquid_plasma", (cs, ms, colors) -> new LiquidPlasmaEffect(cs));
 
+        // Bundled font codes (&[display], &[display_color]); registered first so the config can override them
+        PhoenixFonts.init();
+
         // Init the registry so it can parse types
         ChromaticEffectsRegistry.init();
         ChromaticColors.init();
 
+        modEventBus.addListener(net.phoenix.chromatic_codes.network.ChromaticNetwork::register);
         modEventBus.addListener(this::commonSetup);
 
         // FIX: Removed the empty NeoForge.EVENT_BUS.register(this) call that caused the crash.

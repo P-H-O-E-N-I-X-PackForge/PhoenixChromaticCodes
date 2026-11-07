@@ -87,6 +87,69 @@ public class ChromaticAPI {
         return false;
     }
 
+    /**
+     * Points a single-char code at a font id that already resolves to an effect through {@link #getByFont} (an inline
+     * font, see {@link InlineEffects#define}), without registering an effect of its own. Used for codes defined at
+     * runtime (KubeJS), which can't add font resources after the resource reload.
+     *
+     * @return the font this code pointed at before, or null; pass it to {@link #restoreCode} to undo.
+     */
+    public static ResourceLocation aliasCode(char code, ResourceLocation fontId) {
+        return CODE_TO_FONT.put(Character.toLowerCase(code), fontId);
+    }
+
+    /** Named-code counterpart of {@link #aliasCode}. */
+    public static ResourceLocation aliasNamed(String name, ResourceLocation fontId) {
+        return NAMED_TO_FONT.put(normalizeNamedKey(name), fontId);
+    }
+
+    /** Puts a code back to what {@link #aliasCode} returned (null removes the mapping). */
+    public static void restoreCode(char code, ResourceLocation previous) {
+        char c = Character.toLowerCase(code);
+        if (previous == null) CODE_TO_FONT.remove(c);
+        else CODE_TO_FONT.put(c, previous);
+    }
+
+    /** Named-code counterpart of {@link #restoreCode}. */
+    public static void restoreNamed(String name, ResourceLocation previous) {
+        String key = normalizeNamedKey(name);
+        if (previous == null) NAMED_TO_FONT.remove(key);
+        else NAMED_TO_FONT.put(key, previous);
+    }
+
+    public static void unregisterOutlineCode(char code) {
+        OUTLINE_CODES.remove(Character.toLowerCase(code));
+    }
+
+    public static void unregisterNamedOutlineCode(String name) {
+        NAMED_OUTLINE_CODES.remove(normalizeNamedKey(name));
+    }
+
+    // Fonts that exist as real font JSON files in a resource pack (as opposed to the generated stand-ins that
+    // ChromaticDynamicPack serves). The dynamic pack must not shadow these.
+    private static final Set<ResourceLocation> RESOURCE_FONTS = new HashSet<>();
+
+    /**
+     * Registers a named code ({@code &[name]}) for a font that ships as a real resource. {@code effect} may be null for
+     * a plain font switch (text color is left alone); pass one to force a color or run per-glyph logic.
+     */
+    public static void registerResourceFontNamed(String name, ResourceLocation fontId, IChromaticEffect effect) {
+        NAMED_TO_FONT.put(normalizeNamedKey(name), fontId);
+        RESOURCE_FONTS.add(fontId);
+        if (effect != null) FONT_TO_EFFECT.put(fontId, effect);
+    }
+
+    /** Single-character counterpart of {@link #registerResourceFontNamed}. */
+    public static void registerResourceFontCode(char code, ResourceLocation fontId, IChromaticEffect effect) {
+        CODE_TO_FONT.put(Character.toLowerCase(code), fontId);
+        RESOURCE_FONTS.add(fontId);
+        if (effect != null) FONT_TO_EFFECT.put(fontId, effect);
+    }
+
+    public static boolean isResourceFont(ResourceLocation fontId) {
+        return RESOURCE_FONTS.contains(fontId);
+    }
+
     public static Set<ResourceLocation> getRegisteredFonts() {
         return FONT_TO_EFFECT.keySet();
     }

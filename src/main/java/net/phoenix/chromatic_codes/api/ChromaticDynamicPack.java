@@ -61,6 +61,7 @@ public class ChromaticDynamicPack implements PackResources {
 
         for (ResourceLocation fontId : ChromaticAPI.getRegisteredFonts()) {
             if (!fontId.getNamespace().equals(NAMESPACE)) continue;
+            if (ChromaticAPI.isResourceFont(fontId)) continue;
             if (location.getPath().equals("font/" + fontId.getPath() + ".json")) {
                 return () -> new ByteArrayInputStream(FONT_JSON);
             }
@@ -81,6 +82,7 @@ public class ChromaticDynamicPack implements PackResources {
 
         for (ResourceLocation fontId : ChromaticAPI.getRegisteredFonts()) {
             if (!fontId.getNamespace().equals(NAMESPACE)) continue;
+            if (ChromaticAPI.isResourceFont(fontId)) continue;
 
             String resourcePath = "font/" + fontId.getPath() + ".json";
             if (!resourcePath.startsWith(path)) continue;

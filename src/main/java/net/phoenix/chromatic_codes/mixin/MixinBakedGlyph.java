@@ -2,6 +2,7 @@ package net.phoenix.chromatic_codes.mixin;
 
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.phoenix.chromatic_codes.ChromaticAPI;
+import net.phoenix.chromatic_codes.api.GlyphGradient;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -9,6 +10,7 @@ import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -53,6 +55,13 @@ public abstract class MixinBakedGlyph {
         if (effect == null) return;
 
         if (red < 0.3f && green < 0.3f && blue < 0.3f) return;
+
+        GlyphGradient gradient = effect.getGlyphGradient();
+        if (gradient != null) {
+            ci.cancel();
+            phoenix$renderGradientGlyph(gradient, italic, x, y, matrix, buffer, alpha, packedLight);
+            return;
+        }
 
         ci.cancel();
 
@@ -107,6 +116,45 @@ public abstract class MixinBakedGlyph {
         buffer.addVertex(matrix, finalXR + italicTop, finalYUp, 0.0F)
                 .setColor(rR, gR, bR, alpha)
                 .setUv(this.u1, this.v0)
+                .setLight(packedLight);
+    }
+
+    /**
+     * Vanilla's quad, cut into a small grid so a multi-stop gradient comes out right (the GPU only interpolates
+     * linearly between vertices). Same geometry/italic handling as the effect path above; every vertex gets the
+     * gradient color for its position in the glyph's em space. Baseline is 7px below the text's top, as for all
+     * vanilla-positioned glyphs.
+     */
+    @Unique
+    private void phoenix$renderGradientGlyph(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
+                                             VertexConsumer buffer, float alpha, int packedLight) {
+        final int n = 4;
+
+        for (int row = 0; row < n; row++) {
+            float t0 = row / (float) n;
+            float t1 = (row + 1) / (float) n;
+            for (int col = 0; col < n; col++) {
+                float s0 = col / (float) n;
+                float s1 = (col + 1) / (float) n;
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s0, t0);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s0, t1);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s1, t1);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s1, t0);
+            }
+        }
+    }
+
+    @Unique
+    private void phoenix$gradientVertex(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
+                                        VertexConsumer buffer, float alpha, int packedLight, float s, float t) {
+        float dx = this.left + (this.right - this.left) * s;     // px right of the pen
+        float dy = this.up + (this.down - this.up) * t;          // px below the text's top
+        float shear = italic ? 1.0F - 0.25F * dy : 0.0F;
+        int color = gradient.colorAt(dx, GlyphGradient.BASELINE - dy);
+        buffer.addVertex(matrix, x + dx + shear, y + dy, 0.0F)
+                .setColor(((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f, (color & 0xFF) / 255.0f,
+                        alpha)
+                .setUv(this.u0 + (this.u1 - this.u0) * s, this.v0 + (this.v1 - this.v0) * t)
                 .setLight(packedLight);
     }
 }

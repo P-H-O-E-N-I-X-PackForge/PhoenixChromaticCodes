@@ -101,6 +101,31 @@ public final class InlineEffects {
         return EFFECT_CACHE.computeIfAbsent(font, f -> Optional.ofNullable(decode(f))).orElse(null);
     }
 
+    /**
+     * Builds an inline font id from explicit parameters. Meant for trusted callers (KubeJS scripts, other mods) that
+     * define effects themselves rather than players typing them, so unlike {@link #fontFor} this ignores
+     * {@code allowInlineCodes}. Same limits as typed definitions: no "outline", at most 16 colors, speeds clamped.
+     *
+     * @param moveSpeed null uses the movement's default
+     * @return the font id, or null if the movement is unknown/unsupported, the colors are empty or too many, or a
+     *         speed isn't finite
+     */
+    public static ResourceLocation define(String movement, float colorSpeed, Float moveSpeed, List<Integer> colors) {
+        if (movement == null) return null;
+        String m = norm(movement);
+        if (!isAllowedMovement(m)) return null;
+        if (colors == null || colors.isEmpty() || colors.size() > MAX_COLORS) return null;
+        if (!Float.isFinite(colorSpeed)) return null;
+        float ms = moveSpeed != null ? moveSpeed : DEFAULT_MOVE_SPEED.getOrDefault(m, 1.0f);
+        if (!Float.isFinite(ms)) return null;
+        return encode(m, clampSpeed(colorSpeed), clampMove(m, ms), colors);
+    }
+
+    /** Like {@link #fontFor} for trusted callers: takes the definition without the leading {@code ~}. */
+    public static ResourceLocation parseDefinition(String body) {
+        return body == null ? null : parse(body);
+    }
+
     private static ResourceLocation parse(String body) {
         String[] t = body.split(":", -1);
 
