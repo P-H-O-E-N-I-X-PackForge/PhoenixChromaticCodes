@@ -1,5 +1,6 @@
 package net.phoenix.chromatic_codes.kubejs;
 
+import net.phoenix.chromatic_codes.api.ScriptedCodes;
 import net.phoenix.chromatic_codes.network.ChromaticNetwork;
 
 import dev.latvian.mods.kubejs.event.EventGroupRegistry;
@@ -35,9 +36,16 @@ public class ChromaticKubeJSPlugin implements KubeJSPlugin {
         }
     }
 
-    // Runs after every script (re)load of each manager; we only care about the server one (start and /reload).
+    // Runs after every script (re)load of each manager: the server one (start and /reload) and the client one.
     @Override
     public void afterScriptsLoaded(ScriptManager manager) {
+        if (manager.scriptType == ScriptType.CLIENT) {
+            // Client scripts just (re)loaded on the client thread: collect and apply their definitions.
+            ChromaticRegisterKubeEvent clientEvent = new ChromaticRegisterKubeEvent();
+            ChromaticEvents.CLIENT_REGISTER.post(ScriptType.CLIENT, clientEvent);
+            ScriptedCodes.applyClient(clientEvent.build());
+            return;
+        }
         if (manager.scriptType != ScriptType.SERVER) return;
 
         ChromaticRegisterKubeEvent event = new ChromaticRegisterKubeEvent();

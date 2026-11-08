@@ -1,5 +1,6 @@
 package net.phoenix.chromatic_codes.kubejs;
 
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.InlineEffects;
 import net.phoenix.chromatic_codes.api.MovementRegistry;
 import net.phoenix.chromatic_codes.api.ScriptedCodes.ColorDef;
@@ -37,6 +38,7 @@ public class ChromaticRegisterKubeEvent implements KubeEvent {
             - `colors`: array of '#RRGGBB' / 'RRGGBB' / '#RGB' strings or numbers (1-16), or the string 'rainbow'
             - `movement`: see `Chromatic.movements()` (default 'none'; 'outline' isn't allowed, use `outline()`)
             - `colorSpeed` (default 1) and `moveSpeed` (default depends on the movement, e.g. size 1.5)
+            - `font` (optional): a bundled font to draw with, see `Chromatic.fonts()` (e.g. 'display')
             Same meanings as the config's gradient lists.
             """)
     public void effect(String key, Object spec) {
@@ -58,7 +60,12 @@ public class ChromaticRegisterKubeEvent implements KubeEvent {
                             "colors must have 1-16 entries and speeds must be finite numbers";
             throw new IllegalArgumentException("Invalid chromatic effect '" + key + "': " + why);
         }
-        effects.add(new Fx(k.name, k.named, movement, colorSpeed, moveSpeed, List.copyOf(cols)));
+        String font = map.get("font") == null ? null : String.valueOf(map.get("font")).trim();
+        if (font != null && ChromaticAPI.getBaseFontByName(font) == null) {
+            throw new IllegalArgumentException("Invalid chromatic effect '" + key + "': unknown font '" + font +
+                    "' (valid: " + ChromaticAPI.getBaseFontNames() + ")");
+        }
+        effects.add(new Fx(k.name, k.named, movement, colorSpeed, moveSpeed, List.copyOf(cols), font));
     }
 
     @Info("""
@@ -70,7 +77,7 @@ public class ChromaticRegisterKubeEvent implements KubeEvent {
         if (InlineEffects.define("none", 0f, null, cols) == null) {
             throw new IllegalArgumentException("Invalid chromatic gradient '" + key + "': need 1-16 colors");
         }
-        effects.add(new Fx(k.name, k.named, "none", 0f, null, List.copyOf(cols)));
+        effects.add(new Fx(k.name, k.named, "none", 0f, null, List.copyOf(cols), null));
     }
 
     @Info("Defines a plain color code: `event.color('[gt_blue]', '#2a6bff')`.")

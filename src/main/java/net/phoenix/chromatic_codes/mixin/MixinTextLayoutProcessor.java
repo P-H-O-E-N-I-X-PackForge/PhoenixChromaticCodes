@@ -4,7 +4,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
 import net.phoenix.chromatic_codes.api.IChromaticLayoutExtensions;
-import net.phoenix.chromatic_codes.api.InlineEffects;
 
 import icyllis.modernui.graphics.text.FontCollection;
 import icyllis.modernui.mc.text.TextLayout;
@@ -50,7 +49,7 @@ public abstract class MixinTextLayoutProcessor {
                        remap = false,
                        target = "Licyllis/modernui/mc/text/TextLayoutEngine;getFontCollection(Lnet/minecraft/resources/ResourceLocation;)Licyllis/modernui/graphics/text/FontCollection;"))
     private FontCollection phoenix$resolveInlineFont(TextLayoutEngine engine, ResourceLocation fontName) {
-        return engine.getFontCollection(InlineEffects.isInlineFont(fontName) ? InlineEffects.BASE_FONT : fontName);
+        return engine.getFontCollection(ChromaticAPI.renderFont(fontName));
     }
 
     // Record how many glyphs existed before this run's shaping call, so we can add exactly

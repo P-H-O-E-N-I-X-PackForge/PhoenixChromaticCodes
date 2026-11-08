@@ -54,14 +54,26 @@ public abstract class MixinBakedGlyph {
         IChromaticEffect effect = ChromaticAPI.getCurrentEffect();
         if (effect == null) return;
 
-        if (red < 0.3f && green < 0.3f && blue < 0.3f) return;
-
+        // Gradient glyphs draw their own shadow too: vanilla's shadow pass arrives as a dark color (25% of the forced
+        // white text color), which would be a flat gray ghost behind the gradient. Shade the gradient instead.
         GlyphGradient gradient = effect.getGlyphGradient();
         if (gradient != null) {
+            boolean shadowPass = red < 0.3f && green < 0.3f && blue < 0.3f;
             ci.cancel();
-            phoenix$renderGradientGlyph(gradient, italic, x, y, matrix, buffer, alpha, packedLight);
+            // Movement over a gradient font (GradientLayerEffect): same scaling rules as the effect path below
+            float gScaleX = effect.getScaleX(x, y);
+            float gScaleY = effect.getScaleY(x, y);
+            float gUniform = effect.getScale(x, y);
+            if (gUniform != 1.0f) {
+                gScaleX = gUniform;
+                gScaleY = gUniform;
+            }
+            phoenix$renderGradientGlyph(gradient, italic, x, y, matrix, buffer, alpha, packedLight,
+                    shadowPass ? 0.25f : 1.0f, gScaleX, gScaleY);
             return;
         }
+
+        if (red < 0.3f && green < 0.3f && blue < 0.3f) return;
 
         ci.cancel();
 
@@ -127,7 +139,9 @@ public abstract class MixinBakedGlyph {
      */
     @Unique
     private void phoenix$renderGradientGlyph(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
-                                             VertexConsumer buffer, float alpha, int packedLight) {
+                                             VertexConsumer buffer, float alpha, int packedLight, float shade,
+                                             float scaleX,
+                                             float scaleY) {
         final int n = 4;
 
         for (int row = 0; row < n; row++) {
@@ -136,24 +150,34 @@ public abstract class MixinBakedGlyph {
             for (int col = 0; col < n; col++) {
                 float s0 = col / (float) n;
                 float s1 = (col + 1) / (float) n;
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s0, t0);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s0, t1);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s1, t1);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, s1, t0);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s0, t0);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s0, t1);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s1, t1);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s1, t0);
             }
         }
     }
 
     @Unique
     private void phoenix$gradientVertex(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
-                                        VertexConsumer buffer, float alpha, int packedLight, float s, float t) {
+                                        VertexConsumer buffer, float alpha, int packedLight, float shade, float scaleX,
+                                        float scaleY,
+                                        float s, float t) {
         float dx = this.left + (this.right - this.left) * s;     // px right of the pen
         float dy = this.up + (this.down - this.up) * t;          // px below the text's top
         float shear = italic ? 1.0F - 0.25F * dy : 0.0F;
-        int color = gradient.colorAt(dx, GlyphGradient.BASELINE - dy);
-        buffer.addVertex(matrix, x + dx + shear, y + dy, 0.0F)
-                .setColor(((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f, (color & 0xFF) / 255.0f,
-                        alpha)
+        int color = gradient.colorAt(dx, gradient.baseline() - dy);
+        float midX = (this.left + this.right) / 2.0f;
+        float midY = (this.up + this.down) / 2.0f;
+        float px = x + midX + (dx - midX) * scaleX + shear;   // scale about the glyph's center, like the effect path
+        float py = y + midY + (dy - midY) * scaleY;
+        buffer.addVertex(matrix, px, py, 0.0F)
+                .setColor(((color >> 16) & 0xFF) / 255.0f * shade, ((color >> 8) & 0xFF) / 255.0f * shade,
+                        (color & 0xFF) / 255.0f * shade, alpha)
                 .setUv(this.u0 + (this.u1 - this.u0) * s, this.v0 + (this.v1 - this.v0) * t)
                 .setLight(packedLight);
     }

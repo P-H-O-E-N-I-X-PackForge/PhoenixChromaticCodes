@@ -2,6 +2,7 @@ package net.phoenix.chromatic_codes.api;
 
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
@@ -127,6 +128,13 @@ public final class InlineEffects {
     }
 
     private static ResourceLocation parse(String body) {
+        // Optional "@fontName" suffix: draw this effect with a bundled font, e.g. wave:FF0000,00FF00@display
+        int at = body.lastIndexOf('@');
+        if (at >= 0) {
+            ResourceLocation base = ChromaticAPI.getBaseFontByName(body.substring(at + 1));
+            ResourceLocation inline = base == null ? null : parse(body.substring(0, at));
+            return inline == null ? null : ChromaticAPI.composeFont(inline, base);
+        }
         String[] t = body.split(":", -1);
 
         float colorSpeed = 1.0f;

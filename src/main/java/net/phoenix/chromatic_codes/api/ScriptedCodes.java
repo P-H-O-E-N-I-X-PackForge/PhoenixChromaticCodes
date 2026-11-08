@@ -26,7 +26,7 @@ import java.util.List;
 public final class ScriptedCodes {
 
     public record Fx(String key, boolean named, String movement, float colorSpeed, @Nullable Float moveSpeed,
-                     List<Integer> colors) {}
+                     List<Integer> colors, @Nullable String font) {}
 
     public record ColorDef(String key, boolean named, int rgb) {}
 
@@ -43,15 +43,58 @@ public final class ScriptedCodes {
 
     private ScriptedCodes() {}
 
-    public static synchronized void apply(Definitions defs) {
-        clear();
+    // Two layers, rebuilt together so one reloading never clobbers the other:
+    // - client: defined by client scripts (ChromaticEvents.clientRegister); survives joining/leaving servers
+    // - server: synced from the server you're on (ChromaticEvents.register); dropped when you leave
+    // Server wins where both define the same code; config codes are what's underneath.
+    private static Definitions clientDefs = Definitions.EMPTY;
+    private static Definitions serverDefs = Definitions.EMPTY;
 
+    /** Server-synced layer. */
+    public static synchronized void apply(Definitions defs) {
+        serverDefs = defs == null ? Definitions.EMPTY : defs;
+        rebuild();
+    }
+
+    /** Client-script layer: replaces whatever client scripts defined before. */
+    public static synchronized void applyClient(Definitions defs) {
+        clientDefs = defs == null ? Definitions.EMPTY : defs;
+        rebuild();
+    }
+
+    /** Drops the server-synced layer (leaving a server); client-script codes stay. */
+    public static synchronized void clear() {
+        serverDefs = Definitions.EMPTY;
+        rebuild();
+    }
+
+    public static synchronized void clearClient() {
+        clientDefs = Definitions.EMPTY;
+        rebuild();
+    }
+
+    private static void rebuild() {
+        while (!UNDO.isEmpty()) UNDO.pop().run();
+        applyLayer(clientDefs);
+        applyLayer(serverDefs);
+    }
+
+    private static void applyLayer(Definitions defs) {
         for (Fx fx : defs.effects()) {
             ResourceLocation font = InlineEffects.define(fx.movement(), fx.colorSpeed(), fx.moveSpeed(), fx.colors());
             if (font == null) {
                 PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: ignoring scripted effect '{}' (movement '{}')",
                         fx.key(), fx.movement());
                 continue;
+            }
+            if (fx.font() != null) {
+                ResourceLocation base = ChromaticAPI.getBaseFontByName(fx.font());
+                if (base == null) {
+                    PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: scripted effect '{}' names unknown font '{}'",
+                            fx.key(), fx.font());
+                    continue;
+                }
+                font = ChromaticAPI.composeFont(font, base);
             }
             String key = fx.key();
             if (fx.named()) {
@@ -97,11 +140,6 @@ public final class ScriptedCodes {
             ChromaticAPI.setOutlineColorValue(defs.outlineColor());
             UNDO.push(() -> ChromaticAPI.setOutlineColorValue(prev));
         }
-    }
-
-    /** Removes everything scripts added and puts back anything they overrode. */
-    public static synchronized void clear() {
-        while (!UNDO.isEmpty()) UNDO.pop().run();
     }
 
     private static <K> void restore(java.util.Map<K, Integer> map, K key, @Nullable Integer prev) {
