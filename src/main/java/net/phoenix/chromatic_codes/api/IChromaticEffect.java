@@ -44,6 +44,15 @@ public interface IChromaticEffect {
         return false;
     }
 
+    /**
+     * Optional per-glyph gradient painted across each glyph's own outline area (see {@link GlyphGradient}). When
+     * non-null the glyph renderer colors the glyph from this instead of {@link #getRenderColor}. Used by fonts that
+     * ship their own gradient (phoenix_display_color).
+     */
+    default GlyphGradient getGlyphGradient() {
+        return null;
+    }
+
     default boolean isPassthrough() {
         return false;
     }

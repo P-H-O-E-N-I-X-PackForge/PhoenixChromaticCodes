@@ -55,9 +55,13 @@ public class PhoenixChromaticCodes {
         MovementRegistry.register("3d_spin", (cs, ms, colors) -> new MatrixSpinEffect(ms));
         MovementRegistry.register("liquid_plasma", (cs, ms, colors) -> new LiquidPlasmaEffect(cs));
 
+        PhoenixFonts.init();
+
         ChromaticEffectsRegistry.init();
 
         ChromaticColors.init();
+
+        net.phoenix.chromatic_codes.network.ChromaticNetwork.init();
 
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);

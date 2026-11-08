@@ -47,6 +47,11 @@ repositories {
         }
     }
     maven {
+        // KubeJS, Rhino
+        name = "LatvianModder"
+        url = "https://maven.latvian.dev/releases"
+    }
+    maven {
         name = "ftbMavenReleases"
         url = uri("https://maven.ftb.dev/releases")
     }
@@ -135,6 +140,12 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    modCompileOnly("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+    modRuntimeOnly("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+
+    modCompileOnly("dev.latvian.mods:rhino-forge:${rhino_version}")
+    modRuntimeOnly("dev.latvian.mods:rhino-forge:${rhino_version}")
 
 
 }

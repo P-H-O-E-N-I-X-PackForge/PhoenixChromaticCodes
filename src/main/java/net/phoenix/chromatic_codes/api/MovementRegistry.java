@@ -19,6 +19,11 @@ public class MovementRegistry {
         return id != null && REGISTRY.containsKey(id.toLowerCase());
     }
 
+    /** All registered movement ids (lowercase). */
+    public static java.util.Set<String> ids() {
+        return java.util.Collections.unmodifiableSet(REGISTRY.keySet());
+    }
+
     public static IChromaticEffect create(String id, float colorSpeed, float moveSpeed, List<Integer> colors) {
         MovementFactory factory = REGISTRY.get(id.toLowerCase());
 
