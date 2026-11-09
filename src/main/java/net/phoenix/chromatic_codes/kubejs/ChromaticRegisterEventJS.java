@@ -1,7 +1,5 @@
 package net.phoenix.chromatic_codes.kubejs;
 
-import dev.latvian.mods.kubejs.event.EventJS;
-import dev.latvian.mods.kubejs.typings.Info;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.InlineEffects;
 import net.phoenix.chromatic_codes.api.MovementRegistry;
@@ -10,6 +8,8 @@ import net.phoenix.chromatic_codes.api.ScriptedCodes.Definitions;
 import net.phoenix.chromatic_codes.api.ScriptedCodes.Fx;
 import net.phoenix.chromatic_codes.api.ScriptedCodes.OutlineDef;
 
+import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.typings.Info;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

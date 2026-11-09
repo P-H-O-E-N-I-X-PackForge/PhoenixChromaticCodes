@@ -110,7 +110,8 @@ public final class ChromaticNetwork {
                 for (int j = 0; j < n; j++) colors.add(buf.readInt());
                 boolean hasFont = buf.readBoolean();
                 String font = buf.readUtf(64);
-                effects.add(new Fx(key, named, movement, colorSpeed, hasMove ? move : null, colors, hasFont ? font : null));
+                effects.add(
+                        new Fx(key, named, movement, colorSpeed, hasMove ? move : null, colors, hasFont ? font : null));
             }
 
             int colorCount = Math.min(buf.readVarInt(), MAX_ENTRIES);

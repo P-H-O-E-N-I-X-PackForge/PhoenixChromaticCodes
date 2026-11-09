@@ -54,7 +54,7 @@ public final class GlyphGradient {
     }
 
     /**
-     * @param pxRight       GUI px right of the glyph's pen position
+     * @param pxRight         GUI px right of the glyph's pen position
      * @param pxAboveBaseline GUI px above the baseline (negative below it)
      */
     public int colorAt(float pxRight, float pxAboveBaseline) {

@@ -44,8 +44,8 @@ public final class ScriptedCodes {
     private ScriptedCodes() {}
 
     // Two layers, rebuilt together so one reloading never clobbers the other:
-    //  - client: defined by client scripts (ChromaticEvents.clientRegister); survives joining/leaving servers
-    //  - server: synced from the server you're on (ChromaticEvents.register); dropped when you leave
+    // - client: defined by client scripts (ChromaticEvents.clientRegister); survives joining/leaving servers
+    // - server: synced from the server you're on (ChromaticEvents.register); dropped when you leave
     // Server wins where both define the same code; config codes are what's underneath.
     private static Definitions clientDefs = Definitions.EMPTY;
     private static Definitions serverDefs = Definitions.EMPTY;
@@ -80,7 +80,6 @@ public final class ScriptedCodes {
     }
 
     private static void applyLayer(Definitions defs) {
-
         for (Fx fx : defs.effects()) {
             ResourceLocation font = InlineEffects.define(fx.movement(), fx.colorSpeed(), fx.moveSpeed(), fx.colors());
             if (font == null) {

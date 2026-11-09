@@ -24,7 +24,7 @@ public class MixinFontSet {
                                          CallbackInfoReturnable<GlyphInfo> cir) {
         ResourceLocation currentFont = ChromaticAPI.getCurrentFontContext();
 
-        if (currentFont != null && currentFont.getNamespace().equals("phoenix_chromatic_codes")) {
+        if (ChromaticAPI.isManagedFont(currentFont)) {
             IChromaticEffect effect = ChromaticAPI.getByFont(currentFont);
             if (effect != null) {
                 GlyphInfo original = cir.getReturnValue();

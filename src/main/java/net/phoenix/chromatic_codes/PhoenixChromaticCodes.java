@@ -64,11 +64,17 @@ public class PhoenixChromaticCodes {
         net.phoenix.chromatic_codes.network.ChromaticNetwork.init();
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::loadComplete);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Phoenix's Chromatic Codes is heating up!");
+    }
+
+    // Every mod has been constructed by now and had its chance to register fonts: resolve config "@font" bindings
+    private void loadComplete(final net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent event) {
+        ChromaticAPI.freezeFonts();
     }
 
     public static ResourceLocation id(String path) {

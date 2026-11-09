@@ -124,7 +124,8 @@ public abstract class MixinBakedGlyph {
      */
     @Unique
     private void phoenix$renderGradientGlyph(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
-                                             VertexConsumer buffer, float alpha, int packedLight, float shade, float scaleX,
+                                             VertexConsumer buffer, float alpha, int packedLight, float shade,
+                                             float scaleX,
                                              float scaleY) {
         final int n = 4;
         float top = this.up - 3.0f;
@@ -136,17 +137,22 @@ public abstract class MixinBakedGlyph {
             for (int col = 0; col < n; col++) {
                 float s0 = col / (float) n;
                 float s1 = (col + 1) / (float) n;
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s0, t0, top, bottom);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s0, t1, top, bottom);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s1, t1, top, bottom);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s1, t0, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s0, t0, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s0, t1, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s1, t1, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX,
+                        scaleY, s1, t0, top, bottom);
             }
         }
     }
 
     @Unique
     private void phoenix$gradientVertex(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
-                                        VertexConsumer buffer, float alpha, int packedLight, float shade, float scaleX, float scaleY,
+                                        VertexConsumer buffer, float alpha, int packedLight, float shade, float scaleX,
+                                        float scaleY,
                                         float s, float t,
                                         float top, float bottom) {
         float dx = this.left + (this.right - this.left) * s;     // px right of the pen
@@ -158,7 +164,8 @@ public abstract class MixinBakedGlyph {
         float px = x + midX + (dx - midX) * scaleX + shear;   // scale about the glyph's center, like the effect path
         float py = y + midY + (dy - midY) * scaleY;
         buffer.vertex(matrix, px, py, 0.0F)
-                .color(((color >> 16) & 0xFF) / 255.0f * shade, ((color >> 8) & 0xFF) / 255.0f * shade, (color & 0xFF) / 255.0f * shade, alpha)
+                .color(((color >> 16) & 0xFF) / 255.0f * shade, ((color >> 8) & 0xFF) / 255.0f * shade,
+                        (color & 0xFF) / 255.0f * shade, alpha)
                 .uv(this.u0 + (this.u1 - this.u0) * s, this.v0 + (this.v1 - this.v0) * t)
                 .uv2(packedLight).endVertex();
     }

@@ -3,7 +3,6 @@ package net.phoenix.chromatic_codes.api;
 import net.minecraft.resources.ResourceLocation;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.PhoenixChromaticCodes;
-import net.phoenix.chromatic_codes.api.effects.GradientFontEffect;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
 /**
@@ -37,16 +36,16 @@ public final class PhoenixFonts {
     private PhoenixFonts() {}
 
     public static void init() {
-        ChromaticAPI.registerResourceFontNamed(DISPLAY_NAME, DISPLAY, null);
-        ChromaticAPI.registerResourceFontNamed(DISPLAY_COLOR_NAME, DISPLAY_COLOR,
-                new GradientFontEffect(COLOR_GRADIENT));
-
-        // One tunable vertical correction for both (config: fonts.displayFontYOffset, GUI px, + = down)
+        // Same public API an addon uses. One tunable vertical correction for both (config: fonts.displayFontYOffset,
+        // GUI px, + = down).
         java.util.function.Supplier<Float> yOffset = () -> ModConfig.INSTANCE == null ? 0f
                 : ModConfig.INSTANCE.fonts.displayFontYOffset;
-        // &c etc. over the color font falls back to its plain sibling so the color actually applies
-        ChromaticAPI.setPlainVariant(DISPLAY_COLOR, DISPLAY);
-        ChromaticAPI.setBaseFontYOffset(DISPLAY, yOffset);
-        ChromaticAPI.setBaseFontYOffset(DISPLAY_COLOR, yOffset);
+
+        ChromaticAPI.registerFont(DISPLAY_NAME, DISPLAY).yOffset(yOffset).register();
+        ChromaticAPI.registerFont(DISPLAY_COLOR_NAME, DISPLAY_COLOR)
+                .gradient(COLOR_GRADIENT)
+                .yOffset(yOffset)
+                .plainVariant(DISPLAY)   // &c etc. over the color font falls back to plain display so the color applies
+                .register();
     }
 }

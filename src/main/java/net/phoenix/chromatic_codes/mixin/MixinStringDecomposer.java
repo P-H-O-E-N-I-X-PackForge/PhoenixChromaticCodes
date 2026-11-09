@@ -52,7 +52,8 @@ public class MixinStringDecomposer {
 
                         ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
                         if (namedFont != null) {
-                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), namedFont)).withColor((TextColor) null);
+                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), namedFont))
+                                    .withColor((TextColor) null);
                             j = closeIdx;
                             continue;
                         }
@@ -66,7 +67,8 @@ public class MixinStringDecomposer {
 
                         ResourceLocation inlineFont = ChromaticAPI.getFontForInlineCode(name);
                         if (inlineFont != null) {
-                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), inlineFont)).withColor((TextColor) null);
+                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), inlineFont))
+                                    .withColor((TextColor) null);
                             j = closeIdx;
                             continue;
                         }
@@ -75,7 +77,8 @@ public class MixinStringDecomposer {
 
                 ResourceLocation effectFont = ChromaticAPI.getFontForCode(c1);
                 if (effectFont != null) {
-                    style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), effectFont)).withColor((TextColor) null);
+                    style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), effectFont))
+                            .withColor((TextColor) null);
                     j++;
                     continue;
                 }

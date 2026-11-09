@@ -63,13 +63,16 @@ public class ChromaticEffectsRegistry {
 
                 ChromaticAPI.registerEffect(code, fontId, effect);
                 if (fontName != null) {
-                    ResourceLocation base = ChromaticAPI.getBaseFontByName(fontName);
+                    final String wantedFont = fontName;   // addons may register fonts after us: bind once all mods are loaded
+                    ChromaticAPI.whenFontsReady(() -> {
+                    ResourceLocation base = ChromaticAPI.getBaseFontByName(wantedFont);
                     if (base == null) {
                         PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: Entry '{}' names unknown font '{}' (known: {}); using the default font.",
-                                entry, fontName, ChromaticAPI.getBaseFontNames());
+                                entry, wantedFont, ChromaticAPI.getBaseFontNames());
                     } else {
                         ChromaticAPI.aliasCode(code, ChromaticAPI.composeFont(fontId, base));
                     }
+                                    });
                 }
             } catch (Exception e) {
                 PhoenixChromaticCodes.LOGGER.error("Failed to register chromatic effect: " + entry, e);
@@ -123,13 +126,16 @@ public class ChromaticEffectsRegistry {
 
                 ChromaticAPI.registerNamedEffect(name, fontId, effect);
                 if (fontName != null) {
-                    ResourceLocation base = ChromaticAPI.getBaseFontByName(fontName);
+                    final String wantedFont = fontName;   // addons may register fonts after us: bind once all mods are loaded
+                    ChromaticAPI.whenFontsReady(() -> {
+                    ResourceLocation base = ChromaticAPI.getBaseFontByName(wantedFont);
                     if (base == null) {
                         PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: Named entry '{}' names unknown font '{}' (known: {}); using the default font.",
-                                entry, fontName, ChromaticAPI.getBaseFontNames());
+                                entry, wantedFont, ChromaticAPI.getBaseFontNames());
                     } else {
                         ChromaticAPI.aliasNamed(name, ChromaticAPI.composeFont(fontId, base));
                     }
+                                    });
                 }
             } catch (Exception e) {
                 PhoenixChromaticCodes.LOGGER.error("Failed to register named chromatic effect: " + entry, e);
