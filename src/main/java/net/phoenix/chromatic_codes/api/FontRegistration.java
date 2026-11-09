@@ -9,11 +9,14 @@ import java.util.function.Supplier;
 /**
  * Registers a font as a Chromatic code, from any mod and any namespace. Obtain one with
  * {@link ChromaticAPI#registerFont(String, ResourceLocation)} and finish with {@link #register()}:
+ * 
  * <pre>{@code
- * ChromaticAPI.registerFont("fancy", new ResourceLocation("myaddon", "fancy"))  // font JSON: assets/myaddon/font/fancy.json
+ * ChromaticAPI.registerFont("fancy", new ResourceLocation("myaddon", "fancy"))  // font JSON:
+ *                                                                               // assets/myaddon/font/fancy.json
  *         .yOffset(1.0f)                  // optional vertical correction, GUI px (+ = down)
  *         .register();
  * }</pre>
+ * 
  * That gives {@code &[fancy]}, lets other effects layer over it ({@code &[fancy]&[wave]}), allows {@code @fancy} in
  * config lines / inline codes / KubeJS {@code font:}, and makes vanilla color codes keep the font.
  * <p>
@@ -32,7 +35,9 @@ public final class FontRegistration {
         this.fontId = fontId;
     }
 
-    /** An effect the font brings with it (e.g. a baked-in gradient). Movement effects layered over it keep their motion. */
+    /**
+     * An effect the font brings with it (e.g. a baked-in gradient). Movement effects layered over it keep their motion.
+     */
     public FontRegistration effect(IChromaticEffect effect) {
         this.effect = effect;
         return this;

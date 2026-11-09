@@ -77,8 +77,7 @@ public abstract class MixinStringRenderOutput {
         ChromaticAPI.setCurrentEffect(null);
         this.phoenix$currentOffsetX = 0;
         // Plain base fonts (no effect) still get their vertical correction
-        this.phoenix$currentOffsetY = ChromaticAPI.isManagedFont(font)
-                ? ChromaticAPI.getBaseFontYOffset(font) : 0;
+        this.phoenix$currentOffsetY = ChromaticAPI.isManagedFont(font) ? ChromaticAPI.getBaseFontYOffset(font) : 0;
         this.y += this.phoenix$currentOffsetY;
     }
 

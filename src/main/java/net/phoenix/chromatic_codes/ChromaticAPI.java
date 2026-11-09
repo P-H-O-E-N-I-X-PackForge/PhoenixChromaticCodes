@@ -4,8 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.phoenix.chromatic_codes.api.FontRegistration;
 import net.phoenix.chromatic_codes.api.GlyphGradient;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
-import net.phoenix.chromatic_codes.api.effects.GradientLayerEffect;
 import net.phoenix.chromatic_codes.api.InlineEffects;
+import net.phoenix.chromatic_codes.api.effects.GradientLayerEffect;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -135,7 +135,7 @@ public class ChromaticAPI {
     // ---- Layering: an effect on top of a resource font -------------------------------------------------------
     // A style has exactly one font id and the effect is looked up from it, so "wave on phoenix_display" can't be two
     // ids. Instead the pair is packed into one composite id:
-    //     phoenix_chromatic_codes:with/<baseFontName>/<effectFontPath>
+    // phoenix_chromatic_codes:with/<baseFontName>/<effectFontPath>
     // getByFont() on it returns the effect part's effect; renderFont() maps it to the base font so glyphs come from
     // the real font. Base fonts must live in this mod's namespace (PhoenixFonts does).
     private static final String COMPOSITE_PREFIX = "with/";
@@ -152,13 +152,15 @@ public class ChromaticAPI {
         GlyphGradient gradient = baseEffect == null ? null : baseEffect.getGlyphGradient();
         if (gradient == null) return movement;
         GradientLayerEffect cached = LAYERED.get(fontId);
-        // Same instance every call (the renderer compares effects by identity), rebuilt if either part was re-registered
+        // Same instance every call (the renderer compares effects by identity), rebuilt if either part was
+        // re-registered
         if (cached == null || cached.movement() != movement || cached.gradient() != gradient) {
             cached = new GradientLayerEffect(movement, gradient);
             LAYERED.put(fontId, cached);
         }
         return cached;
     }
+
     private static final Map<ResourceLocation, ResourceLocation[]> COMPOSITES = new java.util.concurrent.ConcurrentHashMap<>();
     private static final Map<String, ResourceLocation> BASE_FONT_NAMES = new HashMap<>();
     private static final Map<ResourceLocation, String> BASE_FONT_KEYS = new HashMap<>();
@@ -177,7 +179,8 @@ public class ChromaticAPI {
     private static String fontKey(String name) {
         String key = name == null ? "" : name.trim().toLowerCase(java.util.Locale.ROOT);
         if (!key.matches("[a-z0-9_.\\-]+")) {
-            throw new IllegalArgumentException("Invalid font name '" + name + "': use lowercase letters, digits, '_', '.' or '-'");
+            throw new IllegalArgumentException(
+                    "Invalid font name '" + name + "': use lowercase letters, digits, '_', '.' or '-'");
         }
         return key;
     }
@@ -187,7 +190,8 @@ public class ChromaticAPI {
      * {@link #registerFont} / {@code registerResourceFont*}, whatever namespace they live in.
      */
     public static boolean isManagedFont(ResourceLocation fontId) {
-        return fontId != null && (fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) || RESOURCE_FONTS.contains(fontId));
+        return fontId != null &&
+                (fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) || RESOURCE_FONTS.contains(fontId));
     }
 
     /** Start registering a font from an addon: {@code ChromaticAPI.registerFont("name", id).yOffset(1).register()}. */
@@ -330,7 +334,8 @@ public class ChromaticAPI {
         ResourceLocation previous = BASE_FONT_NAMES.put(key, fontId);
         if (previous != null && !previous.equals(fontId)) {
             BASE_FONT_KEYS.remove(previous);
-            PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: font name '{}' re-registered ({} -> {})", key, previous, fontId);
+            PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: font name '{}' re-registered ({} -> {})", key,
+                    previous, fontId);
         }
         BASE_FONT_KEYS.put(fontId, key);
         COMPOSITES.clear();   // composite ids resolve their base font by key, so drop anything cached
