@@ -1,7 +1,9 @@
 package net.phoenix.chromatic_codes;
 
 import net.minecraft.resources.ResourceLocation;
+import net.phoenix.chromatic_codes.api.GlyphGradient;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
+import net.phoenix.chromatic_codes.api.effects.GradientLayerEffect;
 import net.phoenix.chromatic_codes.api.InlineEffects;
 
 import java.util.HashMap;
@@ -39,6 +41,10 @@ public class ChromaticAPI {
     public static IChromaticEffect getByFont(ResourceLocation fontId) {
         IChromaticEffect effect = FONT_TO_EFFECT.get(fontId);
         if (effect == null && InlineEffects.isInlineFont(fontId)) return InlineEffects.effectFor(fontId);
+        if (effect == null) {
+            ResourceLocation[] parts = compositeParts(fontId);
+            if (parts != null) return layeredEffect(fontId, parts);
+        }
         return effect;
     }
 
@@ -107,6 +113,149 @@ public class ChromaticAPI {
         NAMED_OUTLINE_CODES.remove(normalizeNamedKey(name));
     }
 
+    // ---- Layering: an effect on top of a resource font -------------------------------------------------------
+    // A style has exactly one font id and the effect is looked up from it, so "wave on phoenix_display" can't be two
+    // ids. Instead the pair is packed into one composite id:
+    //     phoenix_chromatic_codes:with/<baseFontPath>/<effectFontPath>
+    // getByFont() on it returns the effect part's effect; renderFont() maps it to the base font so glyphs come from
+    // the real font. Base fonts must live in this mod's namespace (PhoenixFonts does).
+    private static final String COMPOSITE_PREFIX = "with/";
+    private static final Map<ResourceLocation, GradientLayerEffect> LAYERED = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Effect for a composite font. Normally that's just the effect part's effect. If the base font brings its own
+     * gradient (display_color), the effect's movement is kept but its colors are replaced by the font's gradient.
+     */
+    private static IChromaticEffect layeredEffect(ResourceLocation fontId, ResourceLocation[] parts) {
+        IChromaticEffect movement = getByFont(parts[0]);
+        if (movement == null) return null;
+        IChromaticEffect baseEffect = FONT_TO_EFFECT.get(parts[1]);
+        GlyphGradient gradient = baseEffect == null ? null : baseEffect.getGlyphGradient();
+        if (gradient == null) return movement;
+        GradientLayerEffect cached = LAYERED.get(fontId);
+        // Same instance every call (the renderer compares effects by identity), rebuilt if either part was re-registered
+        if (cached == null || cached.movement() != movement || cached.gradient() != gradient) {
+            cached = new GradientLayerEffect(movement, gradient);
+            LAYERED.put(fontId, cached);
+        }
+        return cached;
+    }
+    private static final Map<ResourceLocation, ResourceLocation[]> COMPOSITES = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final Map<String, ResourceLocation> BASE_FONT_NAMES = new HashMap<>();
+    private static final Map<ResourceLocation, java.util.function.Supplier<Float>> BASE_FONT_Y_OFFSETS = new HashMap<>();
+
+    /** Short names of fonts usable after '@' in config lines / inline codes / scripts (e.g. "display"). */
+    public static Set<String> getBaseFontNames() {
+        return java.util.Collections.unmodifiableSet(BASE_FONT_NAMES.keySet());
+    }
+
+    public static ResourceLocation getBaseFontByName(String name) {
+        return name == null ? null : BASE_FONT_NAMES.get(normalizeNamedKey(name.trim()));
+    }
+
+    public static boolean isCompositeFont(ResourceLocation fontId) {
+        return fontId != null && fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) &&
+                fontId.getPath().startsWith(COMPOSITE_PREFIX);
+    }
+
+    /** @return {effectFont, baseFont} for a composite id, or null if it isn't one (or names an unknown base). */
+    private static ResourceLocation[] compositeParts(ResourceLocation fontId) {
+        if (!isCompositeFont(fontId)) return null;
+        ResourceLocation[] known = COMPOSITES.get(fontId);
+        if (known != null) return known;
+        String rest = fontId.getPath().substring(COMPOSITE_PREFIX.length());
+        int slash = rest.indexOf('/');
+        if (slash <= 0 || slash == rest.length() - 1) return null;
+        ResourceLocation base = PhoenixChromaticCodes.id(rest.substring(0, slash));
+        ResourceLocation effect = PhoenixChromaticCodes.id(rest.substring(slash + 1));
+        if (!RESOURCE_FONTS.contains(base)) return null;
+        ResourceLocation[] parts = { effect, base };
+        COMPOSITES.put(fontId, parts);
+        return parts;
+    }
+
+    /**
+     * Puts an effect font and a base font into one id. If either isn't in this mod's namespace (or the base isn't a
+     * registered resource font) there's nothing to layer and the effect font is returned unchanged.
+     */
+    public static ResourceLocation composeFont(ResourceLocation effectFont, ResourceLocation baseFont) {
+        String ns = PhoenixChromaticCodes.MOD_ID;
+        if (!baseFont.getNamespace().equals(ns) || !effectFont.getNamespace().equals(ns) ||
+                !RESOURCE_FONTS.contains(baseFont)) {
+            return effectFont;
+        }
+        ResourceLocation id = PhoenixChromaticCodes.id(COMPOSITE_PREFIX + baseFont.getPath() + "/" + effectFont.getPath());
+        COMPOSITES.putIfAbsent(id, new ResourceLocation[] { effectFont, baseFont });
+        return id;
+    }
+
+    private static ResourceLocation basePartOf(ResourceLocation fontId) {
+        ResourceLocation[] parts = compositeParts(fontId);
+        if (parts != null) return parts[1];
+        return RESOURCE_FONTS.contains(fontId) ? fontId : null;
+    }
+
+    private static ResourceLocation effectPartOf(ResourceLocation fontId) {
+        ResourceLocation[] parts = compositeParts(fontId);
+        if (parts != null) return parts[0];
+        if (fontId == null || RESOURCE_FONTS.contains(fontId)) return null;   // a base font's own effect isn't a layer
+        return fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) && getByFont(fontId) != null ? fontId : null;
+    }
+
+    /**
+     * The font a style should end up with when a code switching to {@code incoming} is applied while the text is
+     * currently in {@code current}. Whichever of effect / base font the new code provides replaces that layer; the
+     * other layer carries over. So &[display] then &[wave] (or the reverse) gives wave drawn with the display font.
+     * A vanilla color code resets the font entirely, as before.
+     */
+    public static ResourceLocation mergeFont(ResourceLocation current, ResourceLocation incoming) {
+        ResourceLocation effect = effectPartOf(incoming);
+        if (effect == null) effect = effectPartOf(current);
+        ResourceLocation base = basePartOf(incoming);
+        if (base == null) base = basePartOf(current);
+        if (effect == null || base == null) return incoming;
+        return composeFont(effect, base);
+    }
+
+    // A base font with a built-in effect (display_color's gradient) can name a plain sibling, which a vanilla color
+    // code switches to, since "make this red" can't coexist with a baked-in gradient.
+    private static final Map<ResourceLocation, ResourceLocation> PLAIN_VARIANTS = new HashMap<>();
+
+    public static void setPlainVariant(ResourceLocation baseFont, ResourceLocation plainFont) {
+        PLAIN_VARIANTS.put(baseFont, plainFont);
+    }
+
+    /**
+     * The font to use after a vanilla color code (&c etc.): the current base font survives (its plain variant if it
+     * has one), but any effect layer is dropped so the color applies. Anything that isn't one of our base fonts goes
+     * back to the default font, as before.
+     */
+    public static ResourceLocation fontAfterColor(ResourceLocation current) {
+        ResourceLocation base = basePartOf(current);
+        if (base == null) return net.minecraft.network.chat.Style.DEFAULT_FONT;
+        return PLAIN_VARIANTS.getOrDefault(base, base);
+    }
+
+    /** Which font set glyphs for this style font are drawn from (inline ids -> default, composites -> their base). */
+    public static ResourceLocation renderFont(ResourceLocation fontId) {
+        if (InlineEffects.isInlineFont(fontId)) return InlineEffects.BASE_FONT;
+        ResourceLocation[] parts = compositeParts(fontId);
+        return parts != null ? parts[1] : fontId;
+    }
+
+    /** Vertical correction (GUI px, positive = down) applied to every glyph drawn with this base font. */
+    public static void setBaseFontYOffset(ResourceLocation baseFont, java.util.function.Supplier<Float> offset) {
+        BASE_FONT_Y_OFFSETS.put(baseFont, offset);
+    }
+
+    public static float getBaseFontYOffset(ResourceLocation fontId) {
+        ResourceLocation base = basePartOf(fontId);
+        if (base == null) return 0f;
+        java.util.function.Supplier<Float> supplier = BASE_FONT_Y_OFFSETS.get(base);
+        Float value = supplier == null ? null : supplier.get();
+        return value == null ? 0f : value;
+    }
+
     // Fonts that exist as real font JSON files in a resource pack (as opposed to the generated stand-ins that
     // ChromaticDynamicPack serves). The dynamic pack must not shadow these.
     private static final Set<ResourceLocation> RESOURCE_FONTS = new HashSet<>();
@@ -117,6 +266,7 @@ public class ChromaticAPI {
      */
     public static void registerResourceFontNamed(String name, ResourceLocation fontId, IChromaticEffect effect) {
         NAMED_TO_FONT.put(normalizeNamedKey(name), fontId);
+        BASE_FONT_NAMES.put(normalizeNamedKey(name), fontId);
         RESOURCE_FONTS.add(fontId);
         if (effect != null) FONT_TO_EFFECT.put(fontId, effect);
     }

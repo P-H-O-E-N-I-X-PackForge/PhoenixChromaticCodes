@@ -25,6 +25,21 @@ public class ModConfig {
     @Configurable
     public CompatibilityConfig compatibility = new CompatibilityConfig();
 
+    @Configurable
+    public FontConfig fonts = new FontConfig();
+
+    public static class FontConfig {
+
+        @Configurable
+        @Configurable.Comment({
+                "Vertical correction for the bundled Phoenix Display fonts (&[display], &[display_color]),",
+                "in GUI pixels. Positive moves the text DOWN, negative moves it UP.",
+                "If the font sits too high or too low next to normal text, adjust this; changes apply live.",
+                "Default: 3.0"
+        })
+        public float displayFontYOffset = 3.0f;
+    }
+
     public static class CompatibilityConfig {
 
         @Configurable
@@ -70,6 +85,7 @@ public class ModConfig {
                 "  &[~wave:FF0000,00FF00]            movement:colors",
                 "  &[~1.5:2.0:wave:FF0000,00FF00]    colorSpeed:moveSpeed:movement:colors (same order as the lists above)",
                 "  &[~rainbow]  /  &[~wave:rainbow]  'rainbow' can be used as the color list",
+                "  &[~wave:FF0000,00FF00@display]    add @fontName to draw the effect with a bundled font (display, display_color)",
                 "  &[~size]  /  &[~spacing]          a movement id on its own uses that movement's defaults",
                 "Movement IDs are the same as in the gradient lists ('outline' is not supported inline).",
                 "Limits: at most 16 colors, speeds clamped to +-32, '3d' depth capped at 16.",
@@ -97,6 +113,7 @@ public class ModConfig {
         @Configurable.Comment({
                 "Add custom single-character gradient/effect codes here.",
                 "Format: 'char:colorSpeed:moveSpeed:movementId:hex1,hex2...'",
+                "Optional: add @fontName after the colors to use a bundled font, e.g. 'w:1.0:1.0:wave:rainbow@display'",
                 "Movement IDs: wave, shake, pulse, static_rainbow, glitch, discord, breath, stretch, none, mirror, vertical, spacing, slant, rainbow_wave, chroma, shear, chroma_wave, wobble, compress, fade, 3d, matrix_rain, 3d_spin, liquid_plasma",
                 "Do NOT use vanilla codes (0-9, a-f, k-o, r) as keys."
         })
@@ -128,6 +145,7 @@ public class ModConfig {
         @Configurable.Comment({
                 "Named gradient/effect codes using bracket syntax.",
                 "Format: '[name]:colorSpeed:moveSpeed:movementId:hex1,hex2...'",
+                "Optional: add @fontName after the colors to use a bundled font, e.g. '[ember]:1.0:1.0:wave:FF5500,FFCC00@display'",
                 "Use as &[name] or §[name] in text.",
                 "Movement IDs: wave, shake, pulse, static_rainbow, glitch, discord, breath, stretch, none, mirror, vertical, spacing, slant, rainbow_wave, chroma, shear, chroma_wave, wobble, compress, fade, 3d, matrix_rain, 3d_spin, liquid_plasma",
                 "SPECIAL MODIFIERS GUIDE:",

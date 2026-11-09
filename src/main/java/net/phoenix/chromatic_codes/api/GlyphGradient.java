@@ -14,6 +14,7 @@ public final class GlyphGradient {
     private final float unitsPerPx;
     private final float[] offsets;
     private final int[] rgb;
+    private final java.util.function.Supplier<Float> yOffset;
 
     /**
      * @param x0,y0,x1,y1 gradient line in font units (y up, origin at the pen on the baseline)
@@ -24,6 +25,17 @@ public final class GlyphGradient {
      */
     public GlyphGradient(float x0, float y0, float x1, float y1, float emPx, float unitsPerEm, float[] offsets,
                          int[] rgb) {
+        this(x0, y0, x1, y1, emPx, unitsPerEm, offsets, rgb, null);
+    }
+
+    /**
+     * @param yOffset the vertical correction applied to this font's text (GUI px, + = down), or null for none. The
+     *                correction exists because the font's real baseline isn't where vanilla's frame assumes, so the
+     *                gradient's baseline moves by the same amount ({@link #baseline()}).
+     */
+    public GlyphGradient(float x0, float y0, float x1, float y1, float emPx, float unitsPerEm, float[] offsets,
+                         int[] rgb, java.util.function.Supplier<Float> yOffset) {
+        this.yOffset = yOffset;
         if (offsets.length != rgb.length || offsets.length == 0) throw new IllegalArgumentException("stops");
         this.x0 = x0;
         this.y0 = y0;
@@ -35,8 +47,14 @@ public final class GlyphGradient {
         this.rgb = rgb.clone();
     }
 
+    /** Baseline position in the renderer's frame: px below the text's top, minus any font correction. */
+    public float baseline() {
+        Float o = yOffset == null ? null : yOffset.get();
+        return BASELINE - (o == null ? 0f : o);
+    }
+
     /**
-     * @param pxRight         GUI px right of the glyph's pen position
+     * @param pxRight       GUI px right of the glyph's pen position
      * @param pxAboveBaseline GUI px above the baseline (negative below it)
      */
     public int colorAt(float pxRight, float pxAboveBaseline) {

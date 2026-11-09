@@ -36,7 +36,15 @@ public class ChromaticEffectsRegistry {
                 float colorSpeed = Float.parseFloat(parts[1]);
                 float moveSpeed = Float.parseFloat(parts[2]);
                 String movementId = parts[3].toLowerCase();
-                List<Integer> colors = resolveColors(parts[4].toLowerCase());
+                // optional "@fontName" after the colors draws the effect with a bundled font (see ChromaticAPI.getBaseFontNames)
+                String colorPart = parts[4];
+                String fontName = null;
+                int at = colorPart.indexOf('@');
+                if (at >= 0) {
+                    fontName = colorPart.substring(at + 1).trim();
+                    colorPart = colorPart.substring(0, at);
+                }
+                List<Integer> colors = resolveColors(colorPart.toLowerCase());
 
                 if (movementId.equals("outline")) {
                     PhoenixChromaticCodes.LOGGER.warn(
@@ -54,6 +62,15 @@ public class ChromaticEffectsRegistry {
                         "Phoenix Chromatic: Registering §{} with effect {} on font {}", code, movementId, fontId);
 
                 ChromaticAPI.registerEffect(code, fontId, effect);
+                if (fontName != null) {
+                    ResourceLocation base = ChromaticAPI.getBaseFontByName(fontName);
+                    if (base == null) {
+                        PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: Entry '{}' names unknown font '{}' (known: {}); using the default font.",
+                                entry, fontName, ChromaticAPI.getBaseFontNames());
+                    } else {
+                        ChromaticAPI.aliasCode(code, ChromaticAPI.composeFont(fontId, base));
+                    }
+                }
             } catch (Exception e) {
                 PhoenixChromaticCodes.LOGGER.error("Failed to register chromatic effect: " + entry, e);
             }
@@ -79,7 +96,14 @@ public class ChromaticEffectsRegistry {
                 float colorSpeed = Float.parseFloat(parts[0]);
                 float moveSpeed = Float.parseFloat(parts[1]);
                 String movementId = parts[2].toLowerCase();
-                List<Integer> colors = resolveColors(parts[3].toLowerCase());
+                String colorPart = parts[3];
+                String fontName = null;
+                int at = colorPart.indexOf('@');
+                if (at >= 0) {
+                    fontName = colorPart.substring(at + 1).trim();
+                    colorPart = colorPart.substring(0, at);
+                }
+                List<Integer> colors = resolveColors(colorPart.toLowerCase());
 
                 if (movementId.equals("outline")) {
                     PhoenixChromaticCodes.LOGGER.warn(
@@ -98,6 +122,15 @@ public class ChromaticEffectsRegistry {
                         "Phoenix Chromatic: Registering §[{}] with effect {} on font {}", name, movementId, fontId);
 
                 ChromaticAPI.registerNamedEffect(name, fontId, effect);
+                if (fontName != null) {
+                    ResourceLocation base = ChromaticAPI.getBaseFontByName(fontName);
+                    if (base == null) {
+                        PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: Named entry '{}' names unknown font '{}' (known: {}); using the default font.",
+                                entry, fontName, ChromaticAPI.getBaseFontNames());
+                    } else {
+                        ChromaticAPI.aliasNamed(name, ChromaticAPI.composeFont(fontId, base));
+                    }
+                }
             } catch (Exception e) {
                 PhoenixChromaticCodes.LOGGER.error("Failed to register named chromatic effect: " + entry, e);
             }
@@ -120,6 +153,7 @@ public class ChromaticEffectsRegistry {
         int i = 0;
         int len = text.length();
         StringBuilder plain = new StringBuilder();
+        ResourceLocation currentFont = null;   // so an effect and a base font in consecutive codes layer
 
         while (i < len) {
             char c = text.charAt(i);
@@ -146,7 +180,9 @@ public class ChromaticEffectsRegistry {
                         ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
                         ResourceLocation font = namedFont != null ? namedFont : InlineEffects.fontFor(name);
                         if (font != null) {
-                            seg = seg.withStyle(s -> s.withFont(font).withColor((TextColor) null));
+                            final ResourceLocation merged = ChromaticAPI.mergeFont(currentFont, font);
+                            currentFont = merged;
+                            seg = seg.withStyle(s -> s.withFont(merged).withColor((TextColor) null));
                         } else if (ChromaticColors.NAMED_CUSTOM_FORMATTING
                                 .containsKey(ChromaticAPI.normalizeNamedKey(name))) {
                                     int hex = ChromaticColors.NAMED_CUSTOM_FORMATTING
@@ -171,7 +207,9 @@ public class ChromaticEffectsRegistry {
                 MutableComponent seg = Component.literal(content);
                 ResourceLocation font = ChromaticAPI.getFontForCode(code);
                 if (font != null) {
-                    seg = seg.withStyle(s -> s.withFont(font).withColor((TextColor) null));
+                    final ResourceLocation merged = ChromaticAPI.mergeFont(currentFont, font);
+                    currentFont = merged;
+                    seg = seg.withStyle(s -> s.withFont(merged).withColor((TextColor) null));
                 } else if (CUSTOM_FORMATTING.containsKey(code)) {
                     int hex = CUSTOM_FORMATTING.get(code);
                     seg = seg.withStyle(s -> s.withColor(hex));

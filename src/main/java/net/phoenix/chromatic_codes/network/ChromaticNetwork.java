@@ -74,6 +74,8 @@ public final class ChromaticNetwork {
                 buf.writeFloat(fx.moveSpeed() != null ? fx.moveSpeed() : 0f);
                 buf.writeVarInt(fx.colors().size());
                 for (int c : fx.colors()) buf.writeInt(c);
+                buf.writeBoolean(fx.font() != null);
+                buf.writeUtf(fx.font() != null ? fx.font() : "");
             }
 
             buf.writeVarInt(d.colors().size());
@@ -106,7 +108,9 @@ public final class ChromaticNetwork {
                 int n = Math.min(buf.readVarInt(), MAX_COLORS);
                 List<Integer> colors = new ArrayList<>(n);
                 for (int j = 0; j < n; j++) colors.add(buf.readInt());
-                effects.add(new Fx(key, named, movement, colorSpeed, hasMove ? move : null, colors));
+                boolean hasFont = buf.readBoolean();
+                String font = buf.readUtf(64);
+                effects.add(new Fx(key, named, movement, colorSpeed, hasMove ? move : null, colors, hasFont ? font : null));
             }
 
             int colorCount = Math.min(buf.readVarInt(), MAX_ENTRIES);

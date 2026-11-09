@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticEffectsRegistry;
 import net.phoenix.chromatic_codes.api.InlineEffects;
 import net.phoenix.chromatic_codes.api.MovementRegistry;
@@ -22,6 +23,13 @@ public final class ChromaticJS {
         List<String> ids = new ArrayList<>(MovementRegistry.ids());
         Collections.sort(ids);
         return ids;
+    }
+
+    /** Bundled font names usable as {@code font:} in {@code event.effect(...)} or after {@code @} in inline codes. */
+    public static List<String> fonts() {
+        List<String> names = new ArrayList<>(ChromaticAPI.getBaseFontNames());
+        Collections.sort(names);
+        return names;
     }
 
     /**

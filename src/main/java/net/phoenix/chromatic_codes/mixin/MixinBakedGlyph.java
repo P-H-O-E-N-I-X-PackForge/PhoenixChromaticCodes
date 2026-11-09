@@ -56,8 +56,16 @@ public abstract class MixinBakedGlyph {
         if (gradient != null) {
             boolean shadowPass = red < 0.3f && green < 0.3f && blue < 0.3f;
             ci.cancel();
+            // Movement over a gradient font (GradientLayerEffect): same scaling rules as the effect path below
+            float gScaleX = effect.getScaleX(x, y);
+            float gScaleY = effect.getScaleY(x, y);
+            float gUniform = effect.getScale(x, y);
+            if (gUniform != 1.0f) {
+                gScaleX = gUniform;
+                gScaleY = gUniform;
+            }
             phoenix$renderGradientGlyph(gradient, italic, x, y, matrix, buffer, alpha, packedLight,
-                    shadowPass ? 0.25f : 1.0f);
+                    shadowPass ? 0.25f : 1.0f, gScaleX, gScaleY);
             return;
         }
 
@@ -116,7 +124,8 @@ public abstract class MixinBakedGlyph {
      */
     @Unique
     private void phoenix$renderGradientGlyph(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
-                                             VertexConsumer buffer, float alpha, int packedLight, float shade) {
+                                             VertexConsumer buffer, float alpha, int packedLight, float shade, float scaleX,
+                                             float scaleY) {
         final int n = 4;
         float top = this.up - 3.0f;
         float bottom = this.down - 3.0f;
@@ -127,23 +136,28 @@ public abstract class MixinBakedGlyph {
             for (int col = 0; col < n; col++) {
                 float s0 = col / (float) n;
                 float s1 = (col + 1) / (float) n;
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, s0, t0, top, bottom);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, s0, t1, top, bottom);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, s1, t1, top, bottom);
-                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, s1, t0, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s0, t0, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s0, t1, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s1, t1, top, bottom);
+                phoenix$gradientVertex(gradient, italic, x, y, matrix, buffer, alpha, packedLight, shade, scaleX, scaleY, s1, t0, top, bottom);
             }
         }
     }
 
     @Unique
     private void phoenix$gradientVertex(GlyphGradient gradient, boolean italic, float x, float y, Matrix4f matrix,
-                                        VertexConsumer buffer, float alpha, int packedLight, float shade, float s, float t,
+                                        VertexConsumer buffer, float alpha, int packedLight, float shade, float scaleX, float scaleY,
+                                        float s, float t,
                                         float top, float bottom) {
         float dx = this.left + (this.right - this.left) * s;     // px right of the pen
         float dy = top + (bottom - top) * t;                      // px below the text's top
         float shear = italic ? 1.0F - 0.25F * dy : 0.0F;
-        int color = gradient.colorAt(dx, GlyphGradient.BASELINE - dy);
-        buffer.vertex(matrix, x + dx + shear, y + dy, 0.0F)
+        int color = gradient.colorAt(dx, gradient.baseline() - dy);
+        float midX = (this.left + this.right) / 2.0f;
+        float midY = (top + bottom) / 2.0f;
+        float px = x + midX + (dx - midX) * scaleX + shear;   // scale about the glyph's center, like the effect path
+        float py = y + midY + (dy - midY) * scaleY;
+        buffer.vertex(matrix, px, py, 0.0F)
                 .color(((color >> 16) & 0xFF) / 255.0f * shade, ((color >> 8) & 0xFF) / 255.0f * shade, (color & 0xFF) / 255.0f * shade, alpha)
                 .uv(this.u0 + (this.u1 - this.u0) * s, this.v0 + (this.v1 - this.v0) * t)
                 .uv2(packedLight).endVertex();

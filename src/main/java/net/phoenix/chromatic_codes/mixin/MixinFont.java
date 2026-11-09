@@ -2,7 +2,7 @@ package net.phoenix.chromatic_codes.mixin;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.resources.ResourceLocation;
-import net.phoenix.chromatic_codes.api.InlineEffects;
+import net.phoenix.chromatic_codes.ChromaticAPI;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,6 +18,6 @@ public abstract class MixinFont {
 
     @ModifyVariable(method = "getFontSet", at = @At("HEAD"), argsOnly = true)
     private ResourceLocation phoenix$resolveInlineFont(ResourceLocation fontId) {
-        return InlineEffects.isInlineFont(fontId) ? InlineEffects.BASE_FONT : fontId;
+        return ChromaticAPI.renderFont(fontId);
     }
 }

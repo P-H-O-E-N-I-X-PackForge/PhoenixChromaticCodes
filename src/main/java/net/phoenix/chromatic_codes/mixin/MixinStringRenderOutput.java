@@ -46,7 +46,7 @@ public abstract class MixinStringRenderOutput {
             if (effect != null) {
                 ChromaticAPI.setCurrentEffect(effect);
                 this.phoenix$currentOffsetX = effect.getXOffset(this.x, this.y);
-                this.phoenix$currentOffsetY = effect.getYOffset(this.x, this.y);
+                this.phoenix$currentOffsetY = effect.getYOffset(this.x, this.y) + ChromaticAPI.getBaseFontYOffset(font);
                 this.x += this.phoenix$currentOffsetX;
                 this.y += this.phoenix$currentOffsetY;
                 return;
@@ -55,7 +55,10 @@ public abstract class MixinStringRenderOutput {
 
         ChromaticAPI.setCurrentEffect(null);
         this.phoenix$currentOffsetX = 0;
-        this.phoenix$currentOffsetY = 0;
+        // Plain base fonts (no effect) still get their vertical correction
+        this.phoenix$currentOffsetY = font.getNamespace().equals("phoenix_chromatic_codes")
+                ? ChromaticAPI.getBaseFontYOffset(font) : 0;
+        this.y += this.phoenix$currentOffsetY;
     }
 
     @Inject(method = "accept", at = @At("RETURN"))

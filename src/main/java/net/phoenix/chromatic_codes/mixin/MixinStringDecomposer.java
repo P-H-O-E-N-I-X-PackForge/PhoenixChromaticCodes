@@ -52,7 +52,7 @@ public class MixinStringDecomposer {
 
                         ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
                         if (namedFont != null) {
-                            style = style.withFont(namedFont).withColor((TextColor) null);
+                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), namedFont)).withColor((TextColor) null);
                             j = closeIdx;
                             continue;
                         }
@@ -66,7 +66,7 @@ public class MixinStringDecomposer {
 
                         ResourceLocation inlineFont = ChromaticAPI.getFontForInlineCode(name);
                         if (inlineFont != null) {
-                            style = style.withFont(inlineFont).withColor((TextColor) null);
+                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), inlineFont)).withColor((TextColor) null);
                             j = closeIdx;
                             continue;
                         }
@@ -75,7 +75,7 @@ public class MixinStringDecomposer {
 
                 ResourceLocation effectFont = ChromaticAPI.getFontForCode(c1);
                 if (effectFont != null) {
-                    style = style.withFont(effectFont).withColor((TextColor) null);
+                    style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), effectFont)).withColor((TextColor) null);
                     j++;
                     continue;
                 }
@@ -95,7 +95,7 @@ public class MixinStringDecomposer {
                         ChromaticColors.LAST_CODE.set(' ');
                     } else if (cf.isColor()) {
                         style = style.withColor(TextColor.fromLegacyFormat(cf))
-                                .withFont(Style.DEFAULT_FONT);
+                                .withFont(ChromaticAPI.fontAfterColor(style.getFont()));
                         ChromaticColors.LAST_CODE.set(' ');
                     } else {
                         style = style.applyLegacyFormat(cf);
