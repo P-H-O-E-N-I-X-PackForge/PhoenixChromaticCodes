@@ -40,7 +40,7 @@ public abstract class MixinStringRenderOutput {
                     argsOnly = true,
                     remap = false)
     private Style phoenix$applyApiEffects(Style style) {
-        if (style.getFont().getNamespace().equals("phoenix_chromatic_codes")) {
+        if (ChromaticAPI.isManagedFont(style.getFont())) {
             IChromaticEffect effect = ChromaticAPI.getByFont(style.getFont());
             if (effect != null) {
                 return style.withColor(effect.getRenderColor(0, this.x, this.y));
@@ -58,7 +58,7 @@ public abstract class MixinStringRenderOutput {
             remap = false)
     private void phoenix$applyOffsets(int index, Style style, int codePoint, CallbackInfoReturnable<Boolean> cir) {
         ResourceLocation font = style.getFont();
-        if (font.getNamespace().equals("phoenix_chromatic_codes")) {
+        if (ChromaticAPI.isManagedFont(font)) {
             IChromaticEffect effect = ChromaticAPI.getByFont(font);
             if (effect != null) {
                 if (effect != phoenix$previousEffect) {
@@ -77,8 +77,8 @@ public abstract class MixinStringRenderOutput {
         ChromaticAPI.setCurrentEffect(null);
         this.phoenix$currentOffsetX = 0;
         // Plain base fonts (no effect) still get their vertical correction
-        this.phoenix$currentOffsetY = font.getNamespace().equals("phoenix_chromatic_codes") ?
-                ChromaticAPI.getBaseFontYOffset(font) : 0;
+        this.phoenix$currentOffsetY = ChromaticAPI.isManagedFont(font)
+                ? ChromaticAPI.getBaseFontYOffset(font) : 0;
         this.y += this.phoenix$currentOffsetY;
     }
 

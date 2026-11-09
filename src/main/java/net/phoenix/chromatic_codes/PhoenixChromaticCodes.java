@@ -62,6 +62,7 @@ public class PhoenixChromaticCodes {
         ChromaticColors.init();
 
         modEventBus.addListener(net.phoenix.chromatic_codes.network.ChromaticNetwork::register);
+        modEventBus.addListener(this::loadComplete);
         modEventBus.addListener(this::commonSetup);
 
         // FIX: Removed the empty NeoForge.EVENT_BUS.register(this) call that caused the crash.
@@ -69,6 +70,11 @@ public class PhoenixChromaticCodes {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Phoenix's Chromatic Codes is heating up on NeoForge!");
+    }
+
+    // Every mod has been constructed by now and had its chance to register fonts: resolve config "@font" bindings
+    private void loadComplete(final net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent event) {
+        ChromaticAPI.freezeFonts();
     }
 
     public static ResourceLocation id(String path) {

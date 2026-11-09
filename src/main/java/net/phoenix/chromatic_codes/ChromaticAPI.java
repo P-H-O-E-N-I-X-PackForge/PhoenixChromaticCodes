@@ -1,10 +1,11 @@
 package net.phoenix.chromatic_codes;
 
 import net.minecraft.resources.ResourceLocation;
+import net.phoenix.chromatic_codes.api.FontRegistration;
 import net.phoenix.chromatic_codes.api.GlyphGradient;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
-import net.phoenix.chromatic_codes.api.InlineEffects;
 import net.phoenix.chromatic_codes.api.effects.GradientLayerEffect;
+import net.phoenix.chromatic_codes.api.InlineEffects;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,7 +135,7 @@ public class ChromaticAPI {
     // ---- Layering: an effect on top of a resource font -------------------------------------------------------
     // A style has exactly one font id and the effect is looked up from it, so "wave on phoenix_display" can't be two
     // ids. Instead the pair is packed into one composite id:
-    // phoenix_chromatic_codes:with/<baseFontPath>/<effectFontPath>
+    //     phoenix_chromatic_codes:with/<baseFontName>/<effectFontPath>
     // getByFont() on it returns the effect part's effect; renderFont() maps it to the base font so glyphs come from
     // the real font. Base fonts must live in this mod's namespace (PhoenixFonts does).
     private static final String COMPOSITE_PREFIX = "with/";
@@ -151,17 +152,16 @@ public class ChromaticAPI {
         GlyphGradient gradient = baseEffect == null ? null : baseEffect.getGlyphGradient();
         if (gradient == null) return movement;
         GradientLayerEffect cached = LAYERED.get(fontId);
-        // Same instance every call (the renderer compares effects by identity), rebuilt if either part was
-        // re-registered
+        // Same instance every call (the renderer compares effects by identity), rebuilt if either part was re-registered
         if (cached == null || cached.movement() != movement || cached.gradient() != gradient) {
             cached = new GradientLayerEffect(movement, gradient);
             LAYERED.put(fontId, cached);
         }
         return cached;
     }
-
     private static final Map<ResourceLocation, ResourceLocation[]> COMPOSITES = new java.util.concurrent.ConcurrentHashMap<>();
     private static final Map<String, ResourceLocation> BASE_FONT_NAMES = new HashMap<>();
+    private static final Map<ResourceLocation, String> BASE_FONT_KEYS = new HashMap<>();
     private static final Map<ResourceLocation, java.util.function.Supplier<Float>> BASE_FONT_Y_OFFSETS = new HashMap<>();
 
     /** Short names of fonts usable after '@' in config lines / inline codes / scripts (e.g. "display"). */
@@ -170,7 +170,47 @@ public class ChromaticAPI {
     }
 
     public static ResourceLocation getBaseFontByName(String name) {
-        return name == null ? null : BASE_FONT_NAMES.get(normalizeNamedKey(name.trim()));
+        return name == null ? null : BASE_FONT_NAMES.get(name.trim().toLowerCase(java.util.Locale.ROOT));
+    }
+
+    /** Font names are lowercased and must be usable inside a resource path (composite ids embed them). */
+    private static String fontKey(String name) {
+        String key = name == null ? "" : name.trim().toLowerCase(java.util.Locale.ROOT);
+        if (!key.matches("[a-z0-9_.\\-]+")) {
+            throw new IllegalArgumentException("Invalid font name '" + name + "': use lowercase letters, digits, '_', '.' or '-'");
+        }
+        return key;
+    }
+
+    /**
+     * True for fonts this mod manages: its own generated fonts (effects) and any font registered through
+     * {@link #registerFont} / {@code registerResourceFont*}, whatever namespace they live in.
+     */
+    public static boolean isManagedFont(ResourceLocation fontId) {
+        return fontId != null && (fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) || RESOURCE_FONTS.contains(fontId));
+    }
+
+    /** Start registering a font from an addon: {@code ChromaticAPI.registerFont("name", id).yOffset(1).register()}. */
+    public static FontRegistration registerFont(String name, ResourceLocation fontId) {
+        return new FontRegistration(name, fontId);
+    }
+
+    // Config entries can name a font ("...@myfont") that an addon registers after our constructor ran. Those bindings
+    // wait until load is complete; after that they run immediately (e.g. on a config reload).
+    private static final java.util.List<Runnable> PENDING_FONT_BINDINGS = new java.util.ArrayList<>();
+    private static boolean fontsFrozen = false;
+
+    public static synchronized void whenFontsReady(Runnable binding) {
+        if (fontsFrozen) binding.run();
+        else PENDING_FONT_BINDINGS.add(binding);
+    }
+
+    /** Called once every mod has had the chance to register fonts (load complete). */
+    public static synchronized void freezeFonts() {
+        fontsFrozen = true;
+        java.util.List<Runnable> run = new java.util.ArrayList<>(PENDING_FONT_BINDINGS);
+        PENDING_FONT_BINDINGS.clear();
+        run.forEach(Runnable::run);
     }
 
     public static boolean isCompositeFont(ResourceLocation fontId) {
@@ -186,9 +226,9 @@ public class ChromaticAPI {
         String rest = fontId.getPath().substring(COMPOSITE_PREFIX.length());
         int slash = rest.indexOf('/');
         if (slash <= 0 || slash == rest.length() - 1) return null;
-        ResourceLocation base = PhoenixChromaticCodes.id(rest.substring(0, slash));
+        ResourceLocation base = BASE_FONT_NAMES.get(rest.substring(0, slash));
         ResourceLocation effect = PhoenixChromaticCodes.id(rest.substring(slash + 1));
-        if (!RESOURCE_FONTS.contains(base)) return null;
+        if (base == null) return null;
         ResourceLocation[] parts = { effect, base };
         COMPOSITES.put(fontId, parts);
         return parts;
@@ -199,13 +239,12 @@ public class ChromaticAPI {
      * registered resource font) there's nothing to layer and the effect font is returned unchanged.
      */
     public static ResourceLocation composeFont(ResourceLocation effectFont, ResourceLocation baseFont) {
-        String ns = PhoenixChromaticCodes.MOD_ID;
-        if (!baseFont.getNamespace().equals(ns) || !effectFont.getNamespace().equals(ns) ||
-                !RESOURCE_FONTS.contains(baseFont)) {
+        // The effect side is always one of our generated fonts; the base can be any registered font, in any namespace
+        String baseKey = BASE_FONT_KEYS.get(baseFont);
+        if (baseKey == null || !effectFont.getNamespace().equals(PhoenixChromaticCodes.MOD_ID)) {
             return effectFont;
         }
-        ResourceLocation id = PhoenixChromaticCodes
-                .id(COMPOSITE_PREFIX + baseFont.getPath() + "/" + effectFont.getPath());
+        ResourceLocation id = PhoenixChromaticCodes.id(COMPOSITE_PREFIX + baseKey + "/" + effectFont.getPath());
         COMPOSITES.putIfAbsent(id, new ResourceLocation[] { effectFont, baseFont });
         return id;
     }
@@ -286,8 +325,16 @@ public class ChromaticAPI {
      * a plain font switch (text color is left alone); pass one to force a color or run per-glyph logic.
      */
     public static void registerResourceFontNamed(String name, ResourceLocation fontId, IChromaticEffect effect) {
+        String key = fontKey(name);
         NAMED_TO_FONT.put(normalizeNamedKey(name), fontId);
-        BASE_FONT_NAMES.put(normalizeNamedKey(name), fontId);
+        ResourceLocation previous = BASE_FONT_NAMES.put(key, fontId);
+        if (previous != null && !previous.equals(fontId)) {
+            BASE_FONT_KEYS.remove(previous);
+            PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: font name '{}' re-registered ({} -> {})", key, previous, fontId);
+        }
+        BASE_FONT_KEYS.put(fontId, key);
+        COMPOSITES.clear();   // composite ids resolve their base font by key, so drop anything cached
+        LAYERED.clear();
         RESOURCE_FONTS.add(fontId);
         if (effect != null) FONT_TO_EFFECT.put(fontId, effect);
     }
