@@ -4,6 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -37,7 +41,10 @@ public final class ConfigFileSanitizer {
         try {
             if (file == null || !file.exists()) return;
 
-            List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+            // The config library writes in the platform charset, so on Windows a file holding a section sign is
+            // Windows-1252, not UTF-8. Read and write it back in whichever one it actually is.
+            Charset charset = charsetOf(file);
+            List<String> lines = Files.readAllLines(file.toPath(), charset);
             boolean changed = false;
 
             for (int i = 0; i < lines.size(); i++) {
@@ -55,9 +62,19 @@ public final class ConfigFileSanitizer {
             LOGGER.warn("Found tab-indented line(s) in {} - a known bug in the config library treats those as " +
                     "ending the section they're in, silently dropping everything after them. Converting tabs " +
                     "to spaces before reading.", file.getAbsolutePath());
-            Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
+            Files.write(file.toPath(), lines, charset);
         } catch (Throwable t) {
             LOGGER.error("ConfigFileSanitizer.normalizeLeadingTabs failed for {}", file, t);
+        }
+    }
+
+    private static Charset charsetOf(File file) throws IOException {
+        byte[] bytes = Files.readAllBytes(file.toPath());
+        try {
+            StandardCharsets.UTF_8.newDecoder().decode(ByteBuffer.wrap(bytes));
+            return StandardCharsets.UTF_8;
+        } catch (CharacterCodingException e) {
+            return Charset.forName("windows-1252");
         }
     }
 }
