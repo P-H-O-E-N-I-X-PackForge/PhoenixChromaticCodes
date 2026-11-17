@@ -279,9 +279,6 @@ public class ChromaticAPI {
         ResourceLocation[] parts = compositeParts(fontId);
         if (parts != null) return parts[0];
         if (fontId == null || RESOURCE_FONTS.contains(fontId)) return null;   // a base font's own effect isn't a layer
-        // A passthrough transform (scale/spacing/...) only ever acts as a base, never as the "effect" layer, so it
-        // doesn't fight with itself when it's the incoming code (see mergeFont).
-        if (isPassthroughEffectFont(fontId)) return null;
         return fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) && getByFont(fontId) != null ? fontId : null;
     }
 
@@ -290,8 +287,21 @@ public class ChromaticAPI {
      * currently in {@code current}. Whichever of effect / base font the new code provides replaces that layer; the
      * other layer carries over. So &[display] then &[wave] (or the reverse) gives wave drawn with the display font.
      * A vanilla color code resets the font entirely, as before.
+     * <p>
+     * A passthrough transform (scale/spacing/slant/shear/compress) is eligible for either role - unlike every other
+     * font, which is fixed to one - so it resolves the ambiguity itself: it layers onto whatever base is already
+     * active (display+big keeps display's glyphs, scaled), or failing that onto whatever effect is active (wave+big
+     * keeps wave's motion/color, scaled), or failing that becomes a base of its own (ready for a later color or
+     * movement effect to layer onto it, e.g. big+wave).
      */
     public static ResourceLocation mergeFont(ResourceLocation current, ResourceLocation incoming) {
+        if (isPassthroughEffectFont(incoming)) {
+            ResourceLocation currentBase = basePartOf(current);
+            if (currentBase != null) return composeFont(incoming, currentBase);
+            ResourceLocation currentEffect = effectPartOf(current);
+            return currentEffect != null ? composeFont(currentEffect, incoming) : incoming;
+        }
+
         ResourceLocation effect = effectPartOf(incoming);
         if (effect == null) effect = effectPartOf(current);
         ResourceLocation base = basePartOf(incoming);
