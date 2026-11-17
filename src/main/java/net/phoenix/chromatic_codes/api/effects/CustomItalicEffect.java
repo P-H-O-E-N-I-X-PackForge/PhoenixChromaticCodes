@@ -12,7 +12,12 @@ public class CustomItalicEffect implements IChromaticEffect {
 
     @Override
     public int getRenderColor(int originalColor, float x, float y) {
-        return 0xFFFFFF;
+        return 0xFFFFFF;   // unused: isPassthrough() leaves color to the style (or a layered effect) instead
+    }
+
+    @Override
+    public boolean isPassthrough() {
+        return true;
     }
 
     public float getSlantFactor() {

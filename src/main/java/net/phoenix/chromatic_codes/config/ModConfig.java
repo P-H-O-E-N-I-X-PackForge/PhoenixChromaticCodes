@@ -35,9 +35,9 @@ public class ModConfig {
                 "Vertical correction for the bundled Phoenix Display fonts (&[display], &[display_color]),",
                 "in GUI pixels. Positive moves the text DOWN, negative moves it UP.",
                 "If the font sits too high or too low next to normal text, adjust this; changes apply live.",
-                "Default: 3.0"
+                "Default: 0.0"
         })
-        public float displayFontYOffset = 3.0f;
+        public float displayFontYOffset = 0.0f;
     }
 
     public static class CompatibilityConfig {

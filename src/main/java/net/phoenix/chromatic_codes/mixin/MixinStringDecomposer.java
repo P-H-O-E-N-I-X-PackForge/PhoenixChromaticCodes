@@ -8,8 +8,10 @@ import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.StringDecomposer;
 import net.phoenix.chromatic_codes.ChromaticAPI;
 import net.phoenix.chromatic_codes.api.ChromaticColors;
+import net.phoenix.chromatic_codes.api.IChromaticEffect;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -52,8 +54,7 @@ public class MixinStringDecomposer {
 
                         ResourceLocation namedFont = ChromaticAPI.getFontForNamedCode(name);
                         if (namedFont != null) {
-                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), namedFont))
-                                    .withColor((TextColor) null);
+                            style = phoenix$applyEffectFont(style, namedFont);
                             j = closeIdx;
                             continue;
                         }
@@ -67,8 +68,7 @@ public class MixinStringDecomposer {
 
                         ResourceLocation inlineFont = ChromaticAPI.getFontForInlineCode(name);
                         if (inlineFont != null) {
-                            style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), inlineFont))
-                                    .withColor((TextColor) null);
+                            style = phoenix$applyEffectFont(style, inlineFont);
                             j = closeIdx;
                             continue;
                         }
@@ -77,8 +77,7 @@ public class MixinStringDecomposer {
 
                 ResourceLocation effectFont = ChromaticAPI.getFontForCode(c1);
                 if (effectFont != null) {
-                    style = style.withFont(ChromaticAPI.mergeFont(style.getFont(), effectFont))
-                            .withColor((TextColor) null);
+                    style = phoenix$applyEffectFont(style, effectFont);
                     j++;
                     continue;
                 }
@@ -138,5 +137,20 @@ public class MixinStringDecomposer {
             }
         }
         cir.setReturnValue(true);
+    }
+
+    /**
+     * Applies an effect/named/inline font code: merges it onto the current font, and clears the style's color -
+     * unless the code being applied is a passthrough transform (scale/spacing/slant/shear/compress), which has no
+     * color of its own and should leave whatever color (vanilla or ours) was already active alone.
+     */
+    @Unique
+    private static Style phoenix$applyEffectFont(Style style, ResourceLocation incomingFont) {
+        ResourceLocation merged = ChromaticAPI.mergeFont(style.getFont(), incomingFont);
+        IChromaticEffect incomingEffect = ChromaticAPI.getByFont(incomingFont);
+        if (incomingEffect != null && incomingEffect.isPassthrough()) {
+            return style.withFont(merged);
+        }
+        return style.withFont(merged).withColor((TextColor) null);
     }
 }

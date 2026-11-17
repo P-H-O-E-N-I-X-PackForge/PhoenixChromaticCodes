@@ -30,8 +30,9 @@ public abstract class MixinStringRenderOutput {
     private Style phoenix$applyApiEffects(Style style) {
         if (ChromaticAPI.isManagedFont(style.getFont())) {
             IChromaticEffect effect = ChromaticAPI.getByFont(style.getFont());
-            if (effect != null) {
-
+            // A passthrough effect (pure transform: scale/spacing/slant/shear, no color of its own) leaves the
+            // style's actual color alone, so it composes with whatever color code (vanilla or ours) is active.
+            if (effect != null && !effect.isPassthrough()) {
                 return style.withColor(effect.getRenderColor(0, this.x, this.y));
             }
         }
@@ -56,8 +57,7 @@ public abstract class MixinStringRenderOutput {
         ChromaticAPI.setCurrentEffect(null);
         this.phoenix$currentOffsetX = 0;
         // Plain base fonts (no effect) still get their vertical correction
-        this.phoenix$currentOffsetY = ChromaticAPI.isManagedFont(font)
-                ? ChromaticAPI.getBaseFontYOffset(font) : 0;
+        this.phoenix$currentOffsetY = ChromaticAPI.isManagedFont(font) ? ChromaticAPI.getBaseFontYOffset(font) : 0;
         this.y += this.phoenix$currentOffsetY;
     }
 

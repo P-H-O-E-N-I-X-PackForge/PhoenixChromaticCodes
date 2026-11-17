@@ -4,8 +4,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.phoenix.chromatic_codes.api.FontRegistration;
 import net.phoenix.chromatic_codes.api.GlyphGradient;
 import net.phoenix.chromatic_codes.api.IChromaticEffect;
-import net.phoenix.chromatic_codes.api.effects.GradientLayerEffect;
 import net.phoenix.chromatic_codes.api.InlineEffects;
+import net.phoenix.chromatic_codes.api.effects.GradientLayerEffect;
+import net.phoenix.chromatic_codes.api.effects.TransformLayerEffect;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -117,30 +118,49 @@ public class ChromaticAPI {
     // ---- Layering: an effect on top of a resource font -------------------------------------------------------
     // A style has exactly one font id and the effect is looked up from it, so "wave on phoenix_display" can't be two
     // ids. Instead the pair is packed into one composite id:
-    //     phoenix_chromatic_codes:with/<baseFontName>/<effectFontPath>
+    // phoenix_chromatic_codes:with/<baseFontName>/<effectFontPath>
     // getByFont() on it returns the effect part's effect; renderFont() maps it to the base font so glyphs come from
     // the real font. Base fonts must live in this mod's namespace (PhoenixFonts does).
     private static final String COMPOSITE_PREFIX = "with/";
     private static final Map<ResourceLocation, GradientLayerEffect> LAYERED = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TransformLayerEffect> TRANSFORM_LAYERED = new java.util.concurrent.ConcurrentHashMap<>();
 
     /**
      * Effect for a composite font. Normally that's just the effect part's effect. If the base font brings its own
-     * gradient (display_color), the effect's movement is kept but its colors are replaced by the font's gradient.
+     * gradient (display_color), the effect's movement is kept but its colors are replaced by the font's gradient. If
+     * the base is a passthrough transform (scale/spacing/slant/shear/compress - no color of its own), the effect's
+     * color/movement combine with the base's geometry instead of replacing it.
      */
     private static IChromaticEffect layeredEffect(ResourceLocation fontId, ResourceLocation[] parts) {
         IChromaticEffect movement = getByFont(parts[0]);
         if (movement == null) return null;
         IChromaticEffect baseEffect = FONT_TO_EFFECT.get(parts[1]);
-        GlyphGradient gradient = baseEffect == null ? null : baseEffect.getGlyphGradient();
-        if (gradient == null) return movement;
-        GradientLayerEffect cached = LAYERED.get(fontId);
-        // Same instance every call (the renderer compares effects by identity), rebuilt if either part was re-registered
-        if (cached == null || cached.movement() != movement || cached.gradient() != gradient) {
-            cached = new GradientLayerEffect(movement, gradient);
-            LAYERED.put(fontId, cached);
+        if (baseEffect == null) return movement;
+
+        GlyphGradient gradient = baseEffect.getGlyphGradient();
+        if (gradient != null) {
+            GradientLayerEffect cached = LAYERED.get(fontId);
+            // Same instance every call (the renderer compares effects by identity), rebuilt if either part was
+            // re-registered
+            if (cached == null || cached.movement() != movement || cached.gradient() != gradient) {
+                cached = new GradientLayerEffect(movement, gradient);
+                LAYERED.put(fontId, cached);
+            }
+            return cached;
         }
-        return cached;
+
+        if (baseEffect.isPassthrough()) {
+            TransformLayerEffect cached = TRANSFORM_LAYERED.get(fontId);
+            if (cached == null || cached.colorEffect() != movement || cached.transform() != baseEffect) {
+                cached = new TransformLayerEffect(movement, baseEffect);
+                TRANSFORM_LAYERED.put(fontId, cached);
+            }
+            return cached;
+        }
+
+        return movement;
     }
+
     private static final Map<ResourceLocation, ResourceLocation[]> COMPOSITES = new java.util.concurrent.ConcurrentHashMap<>();
     private static final Map<String, ResourceLocation> BASE_FONT_NAMES = new HashMap<>();
     private static final Map<ResourceLocation, String> BASE_FONT_KEYS = new HashMap<>();
@@ -159,7 +179,8 @@ public class ChromaticAPI {
     private static String fontKey(String name) {
         String key = name == null ? "" : name.trim().toLowerCase(java.util.Locale.ROOT);
         if (!key.matches("[a-z0-9_.\\-]+")) {
-            throw new IllegalArgumentException("Invalid font name '" + name + "': use lowercase letters, digits, '_', '.' or '-'");
+            throw new IllegalArgumentException(
+                    "Invalid font name '" + name + "': use lowercase letters, digits, '_', '.' or '-'");
         }
         return key;
     }
@@ -169,7 +190,8 @@ public class ChromaticAPI {
      * {@link #registerFont} / {@code registerResourceFont*}, whatever namespace they live in.
      */
     public static boolean isManagedFont(ResourceLocation fontId) {
-        return fontId != null && (fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) || RESOURCE_FONTS.contains(fontId));
+        return fontId != null &&
+                (fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) || RESOURCE_FONTS.contains(fontId));
     }
 
     /** Start registering a font from an addon: {@code ChromaticAPI.registerFont("name", id).yOffset(1).register()}. */
@@ -208,7 +230,13 @@ public class ChromaticAPI {
         String rest = fontId.getPath().substring(COMPOSITE_PREFIX.length());
         int slash = rest.indexOf('/');
         if (slash <= 0 || slash == rest.length() - 1) return null;
-        ResourceLocation base = BASE_FONT_NAMES.get(rest.substring(0, slash));
+        String baseSegment = rest.substring(0, slash);
+        ResourceLocation base = BASE_FONT_NAMES.get(baseSegment);
+        if (base == null) {
+            // Not a registered resource font name - maybe it's a passthrough effect font's own path instead.
+            ResourceLocation candidate = PhoenixChromaticCodes.id(baseSegment);
+            if (isPassthroughEffectFont(candidate)) base = candidate;
+        }
         ResourceLocation effect = PhoenixChromaticCodes.id(rest.substring(slash + 1));
         if (base == null) return null;
         ResourceLocation[] parts = { effect, base };
@@ -217,30 +245,43 @@ public class ChromaticAPI {
     }
 
     /**
-     * Puts an effect font and a base font into one id. If either isn't in this mod's namespace (or the base isn't a
-     * registered resource font) there's nothing to layer and the effect font is returned unchanged.
+     * Puts an effect font and a base font into one id. The base can be any registered resource font (any namespace)
+     * or one of our own passthrough transform fonts; the effect side must be one of our own generated fonts. If
+     * neither holds, there's nothing to layer and the effect font is returned unchanged.
      */
     public static ResourceLocation composeFont(ResourceLocation effectFont, ResourceLocation baseFont) {
-        // The effect side is always one of our generated fonts; the base can be any registered font, in any namespace
+        if (!effectFont.getNamespace().equals(PhoenixChromaticCodes.MOD_ID)) return effectFont;
         String baseKey = BASE_FONT_KEYS.get(baseFont);
-        if (baseKey == null || !effectFont.getNamespace().equals(PhoenixChromaticCodes.MOD_ID)) {
-            return effectFont;
+        if (baseKey == null) {
+            if (!isPassthroughEffectFont(baseFont)) return effectFont;
+            baseKey = baseFont.getPath();
         }
         ResourceLocation id = PhoenixChromaticCodes.id(COMPOSITE_PREFIX + baseKey + "/" + effectFont.getPath());
         COMPOSITES.putIfAbsent(id, new ResourceLocation[] { effectFont, baseFont });
         return id;
     }
 
+    /** A pure-transform effect font (scale/spacing/slant/shear/compress - no color of its own) can serve as a base. */
+    private static boolean isPassthroughEffectFont(ResourceLocation fontId) {
+        if (fontId == null || !fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID)) return false;
+        IChromaticEffect effect = FONT_TO_EFFECT.get(fontId);
+        return effect != null && effect.isPassthrough();
+    }
+
     private static ResourceLocation basePartOf(ResourceLocation fontId) {
         ResourceLocation[] parts = compositeParts(fontId);
         if (parts != null) return parts[1];
-        return RESOURCE_FONTS.contains(fontId) ? fontId : null;
+        if (RESOURCE_FONTS.contains(fontId)) return fontId;
+        return isPassthroughEffectFont(fontId) ? fontId : null;
     }
 
     private static ResourceLocation effectPartOf(ResourceLocation fontId) {
         ResourceLocation[] parts = compositeParts(fontId);
         if (parts != null) return parts[0];
         if (fontId == null || RESOURCE_FONTS.contains(fontId)) return null;   // a base font's own effect isn't a layer
+        // A passthrough transform (scale/spacing/...) only ever acts as a base, never as the "effect" layer, so it
+        // doesn't fight with itself when it's the incoming code (see mergeFont).
+        if (isPassthroughEffectFont(fontId)) return null;
         return fontId.getNamespace().equals(PhoenixChromaticCodes.MOD_ID) && getByFont(fontId) != null ? fontId : null;
     }
 
@@ -269,8 +310,9 @@ public class ChromaticAPI {
 
     /**
      * The font to use after a vanilla color code (&c etc.): the current base font survives (its plain variant if it
-     * has one), but any effect layer is dropped so the color applies. Anything that isn't one of our base fonts goes
-     * back to the default font, as before.
+     * has one), but any effect layer is dropped so the color applies. A standalone passthrough transform (scale/
+     * spacing/slant/shear/compress) is a "base" too (see {@link #basePartOf}), so it survives the same way - a color
+     * code recolors it instead of discarding it. Anything else goes back to the default font, as before.
      */
     public static ResourceLocation fontAfterColor(ResourceLocation current) {
         ResourceLocation base = basePartOf(current);
@@ -312,7 +354,8 @@ public class ChromaticAPI {
         ResourceLocation previous = BASE_FONT_NAMES.put(key, fontId);
         if (previous != null && !previous.equals(fontId)) {
             BASE_FONT_KEYS.remove(previous);
-            PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: font name '{}' re-registered ({} -> {})", key, previous, fontId);
+            PhoenixChromaticCodes.LOGGER.warn("Phoenix Chromatic: font name '{}' re-registered ({} -> {})", key,
+                    previous, fontId);
         }
         BASE_FONT_KEYS.put(fontId, key);
         COMPOSITES.clear();   // composite ids resolve their base font by key, so drop anything cached

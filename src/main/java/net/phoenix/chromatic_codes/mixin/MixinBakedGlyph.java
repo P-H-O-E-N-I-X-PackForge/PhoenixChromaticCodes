@@ -69,7 +69,11 @@ public abstract class MixinBakedGlyph {
             return;
         }
 
-        if (red < 0.3f && green < 0.3f && blue < 0.3f) return;
+        // A passthrough effect (scale/spacing/slant/shear/compress) has no color of its own: draw with whatever
+        // color vanilla actually passed in (shadow pass included) instead of the shadow-skip heuristic below, which
+        // exists only to let vanilla's own shadow pass through untouched for effects that override the main pass.
+        boolean passthrough = effect.isPassthrough();
+        if (!passthrough && red < 0.3f && green < 0.3f && blue < 0.3f) return;
 
         ci.cancel();
 
@@ -88,23 +92,28 @@ public abstract class MixinBakedGlyph {
 
         float finalXL = centerX - (charHalfWidth * scaleX);
         float finalXR = centerX + (charHalfWidth * scaleX);
-        float finalYUp = centerY - (charHalfHeight * scaleY) - 3.0f;
-        float finalYDown = centerY + (charHalfHeight * scaleY) - 3.0f;
+        float finalYUp = centerY - (charHalfHeight * scaleY);
+        float finalYDown = centerY + (charHalfHeight * scaleY);
 
-        float localizedX = x % 160.0f;
+        float rL, gL, bL, rR, gR, bR;
+        if (passthrough) {
+            rL = rR = red;
+            gL = gR = green;
+            bL = bR = blue;
+        } else {
+            float localizedX = x % 160.0f;
+            int colorL = effect.getRenderColor(0, localizedX + this.left, y);
+            int colorR = effect.getRenderColor(0, localizedX + this.right, y);
+            rL = ((colorL >> 16) & 0xFF) / 255.0f;
+            gL = ((colorL >> 8) & 0xFF) / 255.0f;
+            bL = (colorL & 0xFF) / 255.0f;
+            rR = ((colorR >> 16) & 0xFF) / 255.0f;
+            gR = ((colorR >> 8) & 0xFF) / 255.0f;
+            bR = (colorR & 0xFF) / 255.0f;
+        }
 
-        int colorL = effect.getRenderColor(0, localizedX + this.left, y);
-        int colorR = effect.getRenderColor(0, localizedX + this.right, y);
-
-        float rL = ((colorL >> 16) & 0xFF) / 255.0f;
-        float gL = ((colorL >> 8) & 0xFF) / 255.0f;
-        float bL = (colorL & 0xFF) / 255.0f;
-        float rR = ((colorR >> 16) & 0xFF) / 255.0f;
-        float gR = ((colorR >> 8) & 0xFF) / 255.0f;
-        float bR = (colorR & 0xFF) / 255.0f;
-
-        float italicTop = italic ? 1.0F - 0.25F * (this.up - 3.0f) : 0.0F;
-        float italicBottom = italic ? 1.0F - 0.25F * (this.down - 3.0f) : 0.0F;
+        float italicTop = italic ? 1.0F - 0.25F * this.up : 0.0F;
+        float italicBottom = italic ? 1.0F - 0.25F * this.down : 0.0F;
 
         buffer.vertex(matrix, finalXL + italicTop, finalYUp, 0.0F).color(rL, gL, bL, alpha).uv(this.u0, this.v0)
                 .uv2(packedLight).endVertex();
@@ -128,8 +137,8 @@ public abstract class MixinBakedGlyph {
                                              float scaleX,
                                              float scaleY) {
         final int n = 4;
-        float top = this.up - 3.0f;
-        float bottom = this.down - 3.0f;
+        float top = this.up;
+        float bottom = this.down;
 
         for (int row = 0; row < n; row++) {
             float t0 = row / (float) n;
